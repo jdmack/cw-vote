@@ -1,5 +1,6 @@
 # Community Warfare Vote
 Author: James Mack
+
 Start Date: 2015-02-25
 
 ## Description
