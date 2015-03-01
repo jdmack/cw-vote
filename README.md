@@ -12,7 +12,7 @@ runs on Enjin using the Engin API.
 
 ### 3 Selectable Voting Modes
 
-- Single vote - One Member - One Vote
+- Single vote - One Member - One Vote (Can just implement as single vote with votes set to 1)
 - Multi Vote - One Member - X votes - admin adjustable for number of votes that one member can use, can only vote once for any ballot item
 - Ranked Vote - Member ranks all choices from 1 to X
 
@@ -21,6 +21,7 @@ runs on Enjin using the Engin API.
 - Admin can reset a member's vote without resetting the whole vote
 - Set the number of days before the vote auto closes
 - The ability to leave out a house/clan for the vote
+- In multi-vote mode, don't allow submission unless all votes are inputted
 
 ### Wishes
 - Can set the vote to auto open and close on the calendar
