@@ -1,0 +1,12 @@
+<?php
+
+class Poll
+{
+    public $id;
+    public $description;
+    public $type;
+    public $start_date;
+    public $end_date;
+}
+
+?>
