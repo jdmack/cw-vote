@@ -48,13 +48,63 @@
         // execute
         $statement->execute();
 
+        $return_value;
         if($statement->affected_rows > 0) {
-            return $statement->insert_id;
+            $return_value = $statement->insert_id;
         }
         else {
             echo "No Results Found";
-            return null;
+            $return_value = null;
         }
+        $statement->close();
+
+        return $return_value;
+    }
+
+    //-------------------------------------------------------------------------
+    // dal_selectPoll
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_selectPoll($id)
+    {
+        $connection = dal_createConnection();
+
+        $query = "SELECT description, type.id, start_date, end_date FROM poll WHERE id = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+          
+        // bind parameters
+        $statement->bind_param('i', $id);
+           
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($description, $type_id, $start_date, $end_date);
+        $statement->fetch();
+
+        // create return object
+        $poll = new Poll();
+        $poll->id = $id;
+        $poll->description = $description;
+        $poll->type = dal_selectPollType($type_id);
+        $poll->start_date = $start_date;
+        $poll->end_date = $end_date;
+
+        $statement->close();
+    
+        return $poll;
+
     }
 
     //-------------------------------------------------------------------------
@@ -68,7 +118,7 @@
     //-------------------------------------------------------------------------
     function dal_selectPollCurrent()
     {
-
+        // TODO
     }
 
     //-------------------------------------------------------------------------
@@ -98,14 +148,59 @@
         // execute
         $statement->execute();
 
+        $return_value;
         if($statement->affected_rows > 0) {
-            return $statement->insert_id;
+            $return_value = $statement->insert_id;
         }
         else {
             echo "No Results Found";
-            return null;
+            $return_value = null;
         }
+        $statement->close();
 
+        return $return_value;
+    }
+
+    //-------------------------------------------------------------------------
+    // dal_selectUser
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_selectUser($id)
+    {
+        $connection = dal_createConnection();
+
+        $query = "SELECT name FROM user WHERE id = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+          
+        // bind parameters
+        $statement->bind_param('i', $id);
+           
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($name);
+        $statement->fetch();
+
+        // create return object
+        $user = new User();
+        $user->id = $id;
+        $user->name = $name;
+    
+        $statement->close();
+
+        return $user;
     }
 
     //-------------------------------------------------------------------------
@@ -117,9 +212,37 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
-    function dal_selectUserByName()
+    function dal_selectUserByName($name)
     {
+        $connection = dal_createConnection();
 
+        $query = "SELECT id FROM user WHERE name = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+          
+        // bind parameters
+        $statement->bind_param('i', $name);
+           
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($id);
+        $statement->fetch();
+
+        // create return object
+        $user = new User();
+        $user->id = $id;
+        $user->name = $name;
+    
+        $statement->close();
+
+        return $user;
     }
 
     //-------------------------------------------------------------------------
@@ -150,13 +273,31 @@
         // execute
         $statement->execute();
 
+        $return_value;
         if($statement->affected_rows > 0) {
-            return $statement->insert_id;
+            $return_value = $statement->insert_id;
         }
         else {
             echo "No Results Found";
-            return null;
+            $return_value = null;
         }
+        $statement->close();
+
+        return $return_value;
+    }
+
+    //-------------------------------------------------------------------------
+    // dal_selectVotesByPoll
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_selectVotesByPoll()
+    {
+        // TODO
     }
 
     //-------------------------------------------------------------------------
@@ -170,7 +311,7 @@
     //-------------------------------------------------------------------------
     function dal_selectVoteByPollAndUser()
     {
-
+        // TODO
     }
 
     //-------------------------------------------------------------------------
@@ -200,18 +341,21 @@
         // execute
         $statement->execute();
 
+        $return_value;
         if($statement->affected_rows > 0) {
-            return $statement->insert_id;
+            $return_value = $statement->insert_id;
         }
         else {
             echo "No Results Found";
-            return null;
+            $return_value = null;
         }
+        $statement->close();
 
+        return $return_value;
     }
 
     //-------------------------------------------------------------------------
-    // dal_selectOptionByName
+    // dal_selectOption
     // 
     // Parameters:
     //  - BLAH: BLAH - BLAH
@@ -219,9 +363,52 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
-    function dal_selectOptionByName()
+    function dal_selectOption($id)
     {
+        $connection = dal_createConnection();
 
+        $query = "SELECT name FROM option WHERE id = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+          
+        // bind parameters
+        $statement->bind_param('i', $id);
+           
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($name);
+        $statement->fetch();
+
+        // create return object
+        $option = new Option();
+        $option->id = $id;
+        $option->name = $name;
+    
+        $statement->close();
+
+        return $option;
+    }
+
+
+    //-------------------------------------------------------------------------
+    // dal_selectOptions
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_selectOptions()
+    {
+        // TODO
     }
 
     //-------------------------------------------------------------------------
@@ -251,14 +438,60 @@
         // execute
         $statement->execute();
 
+        $return_value;
         if($statement->affected_rows > 0) {
-            return $statement->insert_id;
+            $return_value = $statement->insert_id;
         }
         else {
             echo "No Results Found";
-            return null;
+            $return_value = null;
         }
+        $statement->close();
 
+        return $return_value;
+    }
+
+    //-------------------------------------------------------------------------
+    // dal_selectPollOption
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_selectPollOption($id)
+    {
+        $connection = dal_createConnection();
+
+        $query = "SELECT poll, option FROM poll_option WHERE id = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+          
+        // bind parameters
+        $statement->bind_param('i', $id);
+           
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($poll_id, $option_id);
+        $statement->fetch();
+
+        // create return object
+        $poll_option = new Option();
+        $poll_option->id = $id;
+        $poll_option->poll = dal_selectPoll($poll_id);
+        $poll_option->option = dal_selectOption($option_id);
+    
+        $statement->close();
+
+        return $poll_option;
     }
 
     //-------------------------------------------------------------------------
@@ -272,7 +505,7 @@
     //-------------------------------------------------------------------------
     function dal_selectPollOptionsByPoll()
     {
-
+        // TODO
     }
 
     //-------------------------------------------------------------------------
@@ -302,14 +535,17 @@
         // execute
         $statement->execute();
 
+        $return_value;
         if($statement->affected_rows > 0) {
-            return $statement->insert_id;
+            $return_value = $statement->insert_id;
         }
         else {
             echo "No Results Found";
-            return null;
+            $return_value = null;
         }
+        $statement->close();
 
+        return $return_value;
     }
 
     //-------------------------------------------------------------------------
@@ -323,7 +559,37 @@
     //-------------------------------------------------------------------------
     function dal_selectPollTypes()
     {
+        $connection = dal_createConnection();
 
+        $query = "SELECT id, name FROM poll_type";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+          
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($id, $name);
+
+        $poll_types = array();
+
+        while($statement->fetch()) {
+            // create return object
+            $poll_type = new PollType();
+            $poll_type->id = $id;
+            $poll_type->name = $name;
+
+            array_push($poll_types, $poll_type);
+        }
+
+        $statement->close();
+
+        return $poll_types;
     }
 
     //-------------------------------------------------------------------------
