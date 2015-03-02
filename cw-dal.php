@@ -100,6 +100,7 @@
         $poll->type = dal_selectPollType($type_id);
         $poll->start_date = $start_date;
         $poll->end_date = $end_date;
+        $poll->options = dal_selectPollOptionsByPoll($id);
 
         $statement->close();
     
@@ -118,7 +119,40 @@
     //-------------------------------------------------------------------------
     function dal_selectPollCurrent()
     {
-        // TODO
+        $connection = dal_createConnection();
+
+        $query = "SELECT id, description, type.id, start_date, end_date FROM poll WHERE start_date > ? AND end_date < ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+
+        $current_date = date("c"); 
+        // bind parameters
+        $statement->bind_param('ss', $current_date, $currnet_date);
+           
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($description, $type_id, $start_date, $end_date);
+        $statement->fetch();
+
+        // create return object
+        $poll = new Poll();
+        $poll->id = $id;
+        $poll->description = $description;
+        $poll->type = dal_selectPollType($type_id);
+        $poll->start_date = $start_date;
+        $poll->end_date = $end_date;
+        $poll->options = dal_selectPollOptionsByPoll($id);
+
+        $statement->close();
+    
+        return $poll;
     }
 
     //-------------------------------------------------------------------------
@@ -295,9 +329,49 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
-    function dal_selectVotesByPoll()
+    function dal_selectVotesByPoll($id)
     {
-        // TODO
+        $connection = dal_createConnection();
+
+        $query = "SELECT id, poll, user, date, option, value FROM vote WHERE id = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+
+        // bind parameters
+        $statement->bind_param('i', $id);
+          
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($id, $poll_id, $user_id, $date, $option_id, $value);
+
+        $votes = array();
+        
+        $statement->fetch();
+        $poll = dal_selectPoll($poll_id);
+
+        do {
+            // create return object
+            $vote = new Vote();
+            $vote->id = $id;
+            $vote->poll = $poll;
+            $vote->user = dal_selectUser($user_id);
+            $vote->date = $date;
+            $vote->option = dal_selectOption($option_id);
+            $vote->value = $value;
+
+            array_push($votes, $vote);
+        } while($statement->fetch());
+
+        $statement->close();
+
+        return $votes;
     }
 
     //-------------------------------------------------------------------------
@@ -309,9 +383,42 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
-    function dal_selectVoteByPollAndUser()
+    function dal_selectVoteByPollAndUser($poll_id, $user_id)
     {
-        // TODO
+        $connection = dal_createConnection();
+
+        $query = "SELECT id, poll, user, date, option, value FROM vote WHERE poll = ? AND user = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+
+        // bind parameters
+        $statement->bind_param('ii', $poll_id, $user_id);
+          
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($id, $poll_id, $user_id, $date, $option_id, $value);
+
+        $statement->fetch();
+
+        // create return object
+        $vote = new Vote();
+        $vote->id = $id;
+        $poll = dal_selectPoll($poll_id);
+        $vote->user = dal_selectUser($user_id);
+        $vote->date = $date;
+        $vote->option = dal_selectOption($option_id);
+        $vote->value = $value;
+
+        $statement->close();
+
+        return $vote;
     }
 
     //-------------------------------------------------------------------------
@@ -408,7 +515,37 @@
     //-------------------------------------------------------------------------
     function dal_selectOptions()
     {
-        // TODO
+        $connection = dal_createConnection();
+
+        $query = "SELECT id, name FROM option";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+          
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($id, $name);
+
+        $options = array();
+
+        while($statement->fetch()) {
+            // create return object
+            $option = new Option();
+            $option->id = $id;
+            $option->name = $name;
+
+            array_push($options, $option);
+        }
+
+        $statement->close();
+
+        return $options;
     }
 
     //-------------------------------------------------------------------------
@@ -503,9 +640,44 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
-    function dal_selectPollOptionsByPoll()
+    function dal_selectPollOptionsByPoll($id)
     {
-        // TODO
+        $connection = dal_createConnection();
+
+        $query = "SELECT id, option FROM poll_option WHERE poll = $id";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+
+        // bind parameters
+        $statement->bind_param('i', $id);
+          
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($poll_option_id, $option_id);
+
+        $poll_options = array();
+        $poll = dal_selectPoll($id);
+
+        while($statement->fetch()) {
+            // create return object
+            $poll_option = new Option();
+            $poll_option->id = $poll_option_id;
+            $poll_option->poll = $poll;
+            $poll_option->option = dal_selectOption($option_id);
+
+            array_push($poll_options, $poll_option);
+        }
+
+        $statement->close();
+
+        return $options;
     }
 
     //-------------------------------------------------------------------------

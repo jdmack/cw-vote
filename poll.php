@@ -7,6 +7,7 @@ class Poll
     public $type;
     public $start_date;
     public $end_date;
+    public $options;
 }
 
 ?>
