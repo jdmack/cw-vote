@@ -8,7 +8,7 @@ CREATE TABLE poll (
 
 CREATE TABLE user (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    description VARCHAR(20)
+    name VARCHAR(20)
 );
 
 CREATE TABLE vote (
@@ -22,18 +22,18 @@ CREATE TABLE vote (
 
 CREATE TABLE option (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100),
+    name VARCHAR(100)
 );
 
 CREATE TABLE poll_option (
     id INT AUTO_INCREMENT PRIMARY KEY,
     poll INT REFERENCES poll(id),
-    option INT REFERENCES option(id),
+    option INT REFERENCES option(id)
 );
 
 CREATE TABLE poll_type (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100),
+    name VARCHAR(100)
 );
 
 
