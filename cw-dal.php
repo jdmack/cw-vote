@@ -7,11 +7,11 @@
     //-------------------------------------------------------------------------
     function dal_createConnection()
     {
-        print "Creating new connection\n";
-        $host     = "localhost";
-        $dbname   = "cw_vote";
-        $username = "cw_vote";
-        $password = "1ceSNerO8Ta7qbXydGYJDC5596pxCu3P";
+        //print "Creating new connection\n";
+        global $host;
+        global $dbname;
+        global $username;
+        global $password;
 
         $mysqli = new mysqli($host, $username, $password, $dbname);
 

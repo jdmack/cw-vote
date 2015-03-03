@@ -1,0 +1,8 @@
+<?php
+
+    $host     = "localhost";
+    $dbname   = "cw_vote";
+    $username = "cw_vote";
+    $password = "1ceSNerO8Ta7qbXydGYJDC5596pxCu3P";
+
+?>

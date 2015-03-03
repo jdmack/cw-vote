@@ -20,8 +20,9 @@
         // Perform request
         if($action == "get_current_poll")
         {
+            //print "hello";
             $response = bl_getCurrentPoll();
-            echo $response;
+            print $response;
         }
     }
 

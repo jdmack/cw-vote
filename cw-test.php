@@ -25,12 +25,12 @@
     //    dal_insertPollOption($poll_id, $option->id);
    // }
 
-    //$current_poll = dal_selectPollCurrent();
+    $current_poll = dal_selectPollCurrent();
     //$current_poll = dal_selectPoll($poll_id);
 
     //print(json_encode($poll->type, JSON_PRETTY_PRINT));
-    //print(json_encode($current_poll, JSON_PRETTY_PRINT));
+    print(json_encode($current_poll, JSON_PRETTY_PRINT));
     //print(json_encode($poll_types, JSON_PRETTY_PRINT));
-    print(json_encode(dal_selectPollOption(1), JSON_PRETTY_PRINT));
+    //print(json_encode(dal_selectPollOption(1), JSON_PRETTY_PRINT));
 
 ?>
