@@ -1,14 +1,17 @@
 <?php
 
+    //$connection = null;
+
     //-------------------------------------------------------------------------
     // dal_createConnection
     //-------------------------------------------------------------------------
     function dal_createConnection()
     {
+        print "Creating new connection\n";
         $host     = "localhost";
-        $dbname   = "cw-vote";
-        $username = "cwvote";
-        $password = "";
+        $dbname   = "cw_vote";
+        $username = "cw_vote";
+        $password = "1ceSNerO8Ta7qbXydGYJDC5596pxCu3P";
 
         $mysqli = new mysqli($host, $username, $password, $dbname);
 
@@ -17,9 +20,24 @@
             exit();
         }
 
+        $connection = $mysqli;
         return $mysqli;
     }
 
+    //-------------------------------------------------------------------------
+    // dal_createConnection
+    //-------------------------------------------------------------------------
+    function dal_closeConnection()
+    {
+        /*
+        global $connection;
+        if($connection == null) {
+            return;
+        }
+        $connection->close();
+        $connection = null;
+        */
+    }
 
     //-------------------------------------------------------------------------
     // dal_insertPoll
@@ -57,6 +75,7 @@
             $return_value = null;
         }
         $statement->close();
+        $connection->close();
 
         return $return_value;
     }
@@ -74,7 +93,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT description, type.id, start_date, end_date FROM poll WHERE id = ?";
+        $query = "SELECT description, type, start_date, end_date FROM poll WHERE id = ?";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -100,9 +119,11 @@
         $poll->type = dal_selectPollType($type_id);
         $poll->start_date = $start_date;
         $poll->end_date = $end_date;
-        $poll->options = dal_selectPollOptionsByPoll($id);
+
+        $poll->options = dal_selectOptionsByPoll($id);
 
         $statement->close();
+        $connection->close();
     
         return $poll;
 
@@ -121,7 +142,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT id, description, type.id, start_date, end_date FROM poll WHERE start_date > ? AND end_date < ?";
+        $query = "SELECT id, description, type, start_date, end_date FROM poll WHERE start_date < ? AND end_date > ?";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -132,13 +153,13 @@
 
         $current_date = date("c"); 
         // bind parameters
-        $statement->bind_param('ss', $current_date, $currnet_date);
+        $statement->bind_param('ss', $current_date, $current_date);
            
         // execute
         $statement->execute();
-        
+
         // get results
-        $statement->bind_result($description, $type_id, $start_date, $end_date);
+        $statement->bind_result($id, $description, $type_id, $start_date, $end_date);
         $statement->fetch();
 
         // create return object
@@ -148,9 +169,10 @@
         $poll->type = dal_selectPollType($type_id);
         $poll->start_date = $start_date;
         $poll->end_date = $end_date;
-        $poll->options = dal_selectPollOptionsByPoll($id);
+        $poll->options = dal_selectOptionsByPoll($id);
 
         $statement->close();
+        $connection->close();
     
         return $poll;
     }
@@ -191,6 +213,7 @@
             $return_value = null;
         }
         $statement->close();
+        $connection->close();
 
         return $return_value;
     }
@@ -233,6 +256,7 @@
         $user->name = $name;
     
         $statement->close();
+        $connection->close();
 
         return $user;
     }
@@ -250,7 +274,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT id FROM user WHERE name = ?";
+        $query = "SELECT id, name FROM user WHERE name = ?";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -260,13 +284,13 @@
         }
           
         // bind parameters
-        $statement->bind_param('i', $name);
+        $statement->bind_param('s', $name);
            
         // execute
         $statement->execute();
         
         // get results
-        $statement->bind_result($id);
+        $statement->bind_result($id, $name);
         $statement->fetch();
 
         // create return object
@@ -275,6 +299,7 @@
         $user->name = $name;
     
         $statement->close();
+        $connection->close();
 
         return $user;
     }
@@ -288,6 +313,7 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
+    // TODO - Test
     function dal_insertVote($vote)
     {
         $connection = dal_createConnection();
@@ -316,6 +342,7 @@
             $return_value = null;
         }
         $statement->close();
+        $connection->close();
 
         return $return_value;
     }
@@ -329,6 +356,7 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
+    // TODO - Test
     function dal_selectVotesByPoll($id)
     {
         $connection = dal_createConnection();
@@ -370,6 +398,7 @@
         } while($statement->fetch());
 
         $statement->close();
+        $connection->close();
 
         return $votes;
     }
@@ -383,6 +412,7 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
+    // TODO - Test
     function dal_selectVoteByPollAndUser($poll_id, $user_id)
     {
         $connection = dal_createConnection();
@@ -417,6 +447,7 @@
         $vote->value = $value;
 
         $statement->close();
+        $connection->close();
 
         return $vote;
     }
@@ -457,6 +488,7 @@
             $return_value = null;
         }
         $statement->close();
+        $connection->close();
 
         return $return_value;
     }
@@ -499,6 +531,7 @@
         $option->name = $name;
     
         $statement->close();
+        $connection->close();
 
         return $option;
     }
@@ -544,6 +577,7 @@
         }
 
         $statement->close();
+        $connection->close();
 
         return $options;
     }
@@ -557,7 +591,7 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
-    function dal_insertPollOption($poll_option)
+    function dal_insertPollOption($poll_id, $option_id)
     {
         $connection = dal_createConnection();
 
@@ -570,7 +604,7 @@
         }
         
         // bind parameters
-        $statement->bind_param('ii', $poll_option->poll->id, $poll_option->option->id);
+        $statement->bind_param('ii', $poll_id, $option_id);
 
         // execute
         $statement->execute();
@@ -584,6 +618,7 @@
             $return_value = null;
         }
         $statement->close();
+        $connection->close();
 
         return $return_value;
     }
@@ -601,7 +636,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT poll, option FROM poll_option WHERE id = ?";
+        $query = "SELECT poll, option, option.name FROM poll_option, option WHERE poll_option.id = ? AND option.id = option";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -617,18 +652,18 @@
         $statement->execute();
         
         // get results
-        $statement->bind_result($poll_id, $option_id);
+        $statement->bind_result($poll_id, $option_id, $name);
         $statement->fetch();
 
         // create return object
-        $poll_option = new Option();
-        $poll_option->id = $id;
-        $poll_option->poll = dal_selectPoll($poll_id);
-        $poll_option->option = dal_selectOption($option_id);
+        $option = new Option();
+        $option->id = $id;
+        $option->name = $name;
     
         $statement->close();
+        $connection->close();
 
-        return $poll_option;
+        return $option;
     }
 
     //-------------------------------------------------------------------------
@@ -640,11 +675,12 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
-    function dal_selectPollOptionsByPoll($id)
+    function dal_selectOptionsByPoll($id)
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT id, option FROM poll_option WHERE poll = $id";
+        $query = "SELECT poll_option.option, option.name FROM "
+            . "poll_option, option WHERE poll_option.poll = ? AND poll_option.option = option.id";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -660,22 +696,21 @@
         $statement->execute();
         
         // get results
-        $statement->bind_result($poll_option_id, $option_id);
+        $statement->bind_result($option_id, $name);
 
-        $poll_options = array();
-        $poll = dal_selectPoll($id);
+        $options = array();
 
         while($statement->fetch()) {
             // create return object
-            $poll_option = new Option();
-            $poll_option->id = $poll_option_id;
-            $poll_option->poll = $poll;
-            $poll_option->option = dal_selectOption($option_id);
+            $option = new Option();
+            $option->id = $option_id;
+            $option->name = $name;
 
-            array_push($poll_options, $poll_option);
+            array_push($options, $option);
         }
 
         $statement->close();
+        $connection->close();
 
         return $options;
     }
@@ -716,8 +751,55 @@
             $return_value = null;
         }
         $statement->close();
+        $connection->close();
 
         return $return_value;
+    }
+
+    //-------------------------------------------------------------------------
+    // dal_selectPollType
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_selectPollType($id)
+    {
+        $connection = dal_createConnection();
+
+        $query = "SELECT id, name FROM poll_type WHERE id = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+
+        // bind parameters
+        $statement->bind_param('i', $id);
+          
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($id, $name);
+
+        $poll_types = array();
+
+        $statement->fetch();
+
+        // create return object
+        $poll_type = new PollType();
+        $poll_type->id = $id;
+        $poll_type->name = $name;
+
+        $statement->close();
+        $connection->close();
+
+        return $poll_type;
     }
 
     //-------------------------------------------------------------------------
@@ -760,6 +842,7 @@
         }
 
         $statement->close();
+        $connection->close();
 
         return $poll_types;
     }
