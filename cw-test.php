@@ -1,5 +1,6 @@
 <?php
     include_once('cw-dal.php');
+    include_once('cw-config.php');
 
     include_once('objects/option.php');
     include_once('objects/poll.php');
@@ -10,22 +11,33 @@
     date_default_timezone_set('America/Los_Angeles');
 
     /*
+    // INSERT POLL
     $poll = new Poll();
-    $poll->description = "Test Poll - Clan";
+    $poll->description = "Test Poll 3";
     $poll->type = dal_selectPollType(1);
     $poll->start_date = date('c');
-    $poll->end_date = date('c', time() + 60 * 60 * 24 * 2);
+    $poll->end_date = date('c', time() + 60 * 60 * 24 * 7);
     $poll_id = dal_insertPoll($poll);
+    print "poll_id: $poll_id\n";
+
+    $options = dal_selectOptions();
+    foreach($options as $option) {
+        dal_insertPollOption($poll_id, $option->id);
+    }
     */
-    //$poll_id = 3;
-
-    //$options = dal_selectOptions();
-
-    //foreach($options as $option) {
-    //    dal_insertPollOption($poll_id, $option->id);
-   // }
 
     $current_poll = dal_selectPollCurrent();
+
+    // INSERT VOTE
+    /*
+    $vote = new Vote();
+    $vote->poll = $current_poll;
+    $vote->user = dal_selectUserByName("test");
+    $vote->date = date('c');
+    $vote->option = dal_selectOption(1); 
+    dal_insertVote($vote);
+    */
+
     //$current_poll = dal_selectPoll($poll_id);
 
     //print(json_encode($poll->type, JSON_PRETTY_PRINT));

@@ -10,10 +10,10 @@
         //print "Creating new connection\n";
         global $host;
         global $dbname;
-        global $username;
-        global $password;
+        global $db_username;
+        global $db_password;
 
-        $mysqli = new mysqli($host, $username, $password, $dbname);
+        $mysqli = new mysqli($host, $db_username, $db_password, $dbname);
 
         if($mysqli->connect_error) {
             printf("Connect failed: %s\n", $mysqli->connect_error);
@@ -159,6 +159,12 @@
         $statement->execute();
 
         // get results
+        $statement->store_result();
+
+        if($statement->num_rows <= 0) {
+            return null;
+        }
+
         $statement->bind_result($id, $description, $type_id, $start_date, $end_date);
         $statement->fetch();
 
@@ -288,6 +294,12 @@
            
         // execute
         $statement->execute();
+
+        $statement->store_result();
+
+        if($statement->num_rows <= 0) {
+            return null;
+        }
         
         // get results
         $statement->bind_result($id, $name);
@@ -329,6 +341,53 @@
         // bind parameters
         $statement->bind_param('iisis', $vote->poll->id, $vote->user->id, $vote->date, 
             $vote->option->id, $vote->value);
+
+        // execute
+        $statement->execute();
+
+        $return_value;
+        if($statement->affected_rows > 0) {
+            $return_value = $statement->insert_id;
+        }
+        else {
+            echo "No Results Found";
+            $return_value = null;
+        }
+        $statement->close();
+        $connection->close();
+
+        return $return_value;
+    }
+
+    //-------------------------------------------------------------------------
+    // dal_updateVote
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_updateVote($vote)
+    {
+        $connection = dal_createConnection();
+
+        $query = "UPDATE vote SET poll = ?, user = ?, date = ?, option = ?, value = ? WHERE id = ?";
+
+        // Prepare statement
+        $statement = $connection->prepare($query);
+        if($statement == false) {
+            trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+        
+        // bind parameters
+        $statement->bind_param('iisisi', 
+            $vote->poll->id, 
+            $vote->user->id, 
+            $vote->date, 
+            $vote->option->id, 
+            $vote->value,
+            $vote->id);
 
         // execute
         $statement->execute();
@@ -431,6 +490,12 @@
           
         // execute
         $statement->execute();
+
+        $statement->store_result();
+
+        if($statement->num_rows <= 0) {
+            return null;
+        }
         
         // get results
         $statement->bind_result($id, $poll_id, $user_id, $date, $option_id, $value);
@@ -580,6 +645,54 @@
         $connection->close();
 
         return $options;
+    }
+
+    //-------------------------------------------------------------------------
+    // dal_selectOptionByName
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_selectOptionByName($name)
+    {
+        $connection = dal_createConnection();
+
+        $query = "SELECT id, name FROM option WHERE name = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+          
+        // bind parameters
+        $statement->bind_param('s', $name);
+           
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->store_result();
+
+        if($statement->num_rows <= 0) {
+            return null;
+        }
+        $statement->bind_result($id, $name);
+        $statement->fetch();
+
+        // create return object
+        $option = new Option();
+        $option->id = $id;
+        $option->name = $name;
+    
+        $statement->close();
+        $connection->close();
+
+        return $option;
     }
 
     //-------------------------------------------------------------------------

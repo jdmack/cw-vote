@@ -12,8 +12,7 @@
         - update(name, value)
         - updateAll(array)  
     */
-    if(isset($_GET['action'])) 
-    {
+    if(isset($_GET['action'])) {
         $action = $_GET['action'];
         //echo "action: $action\n";
 
@@ -22,6 +21,22 @@
         {
             //print "hello";
             $response = bl_getCurrentPoll();
+            print $response;
+        }
+        else if($action == "get_vote_current") {
+            $username = $_GET['username'];
+            $response = bl_getVoteCurrent($username);
+            print $response;
+        }
+    }
+
+    else if(isset($_POST['action'])) {
+        $action = $_POST['action'];
+
+        if($action == "cast_vote") {
+            $username = $_POST['username'];
+            $option = $_POST['option'];
+            $response = bl_castVote($username, $option);
             print $response;
         }
     }
