@@ -1,9 +1,5 @@
 <?php
-    require_once('cw-bl.php');
-    date_default_timezone_set('America/Los_Angeles');
-
-
-    // Read request
+    require_once('cw-bl.php'); date_default_timezone_set('America/Los_Angeles'); // Read request
     /* Actions:
         - create_poll
         - 
@@ -26,6 +22,10 @@
         else if($action == "get_vote_current") {
             $username = $_GET['username'];
             $response = bl_getVoteCurrent($username);
+            print $response;
+        }
+        else if($action == "get_current_results") {
+            $response = bl_getCurrentPollResults();
             print $response;
         }
     }

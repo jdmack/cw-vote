@@ -113,4 +113,37 @@
         }
     }
 
+    //-------------------------------------------------------------------------
+    // bl_getCurrentPollResults
+    //
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    //
+    //-------------------------------------------------------------------------
+    function bl_getCurrentPollResults()
+    {
+        $poll = dal_selectPollCurrent();
+        if($poll == null) {
+            return null;
+        }
+        $options = dal_selectOptionsByPoll($poll->id);
+        $counts = dal_selectVoteCounts($poll->id);
+        //print json_encode($options);
+
+        $results = array();
+
+        foreach($options as $option) {
+            $count = 0;
+            if(array_key_exists($option->name, $counts)) {
+                $count = $counts[$option->name];
+            }
+            $results[$option->name] = $count;
+        }
+        
+        $json = json_encode($results);
+        return $json;
+    }
+
 ?>

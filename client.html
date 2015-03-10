@@ -5,19 +5,25 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script>
     
     var locked = false;
+        google.load('visualization', '1.0', {'packages':['corechart']});
+        google.setOnLoadCallback(function() {
+            $(function() {
+                onLoad();
+            });
+        });
 
+    /*
     $(document).ready(function() {
 
-
-        onLoad();
     });
+    */
 
     function onLoad()
     {
-        
         $.when(
             $.ajax({
                 url: "http://wulph.com/cw-vote/cw-service.php",
@@ -32,25 +38,38 @@
                 url: "http://wulph.com/cw-vote/cw-service.php",
                 data: {
                     action: "get_vote_current",
-                    username: "test"
+                    username: $("#username").val()
                 },
                 type: "GET",
                 dataType: "json",
                 error: error_func
+            }),
+            $.ajax({
+                url: "http://www.enjin.com/api/v1/api.php",
+                data: {
+                    method: "User.get",
+                },
+                type: "POST",
+                dataType: "json",
+                error: error_func
             })
         ).then(drawVoteView);
+
+        results();
         $("#debug").html("Test2");
     }
 
-    function drawVoteView(poll_response, vote_response)
+    function drawVoteView(poll_response, vote_response, user_response)
     {
         var poll = poll_response[0];
         var vote = vote_response[0];
+        $("#debug").append(JSON.stringify(user_response));
 
 
         $("#main").append("<h2>" + poll.description + "</h2>\n");
         $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
         $("#main").append("<h3>End: " + poll.end_date + "</h3>\n");
+        $("#main").append("<input type=\"text\" name=\"username\" id=\"username\" value=\"test\"></input><br>\n");
 
         $("#main").append("<ul id=\"vote_list\"></ul>\n");
         for(i = 0; i < poll.options.length; i++) {
@@ -75,6 +94,40 @@
         }
         set_click_trigger();
         
+    }
+
+    function results()
+    {
+        // Request results data
+        $.ajax({
+            url: "http://wulph.com/cw-vote/cw-service.php",
+            data: {
+                action: "get_current_results",
+            },
+            type: "GET",
+            dataType: "json",
+            success: drawResults,
+            error: error_func
+        });
+
+    }
+    function drawResults(response)
+    {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Faction');
+        data.addColumn('number', 'Votes');
+
+        for(var key in response) {
+            data.addRow([key, response[key]]);
+        }
+
+        var options = {
+            'title':'Poll Results',
+            'width' : 800,
+            'height': 500
+        };
+        var chart = new google.visualization.ColumnChart(document.getElementById('results'));
+        chart.draw(data, options);
     }
 
     function revote()
@@ -107,7 +160,7 @@
             url: "http://wulph.com/cw-vote/cw-service.php",
             data: {
                 action: "cast_vote",
-                username: "test",
+                username: $("#username").val(),
                 option: option
             },
             type: "POST",
@@ -118,6 +171,7 @@
                 $("#message").append("<p>Your vote for " + option + " was submitted.</p>");
                 $("#message").append("<p>Click below to recast your vote.</p>"
                     + "<button id=\"revote_button\" onclick=\"revote()\">Re-vote</button></div>\n");
+                results();
 
             },
             error: error_func
@@ -155,6 +209,9 @@
         .selected {
             background-color: #3333FF;  
         }
+        .selected:hover {
+            background-color: #3333FF;
+        }
         li {
             background-color: #CCCCCC;  
             width: 150px;
@@ -162,6 +219,9 @@
             margin: 2px 2px 2px 2px;
             padding: 2px 2px 2px 2px;
             /*float: left;*/
+        }
+        li:hover {
+            background-color: #FF6666;
         }
         ul#vote_list {
             display: inline-block;
@@ -179,12 +239,20 @@
             margin-left: auto;
             padding: 5px 5px 5px 5px;
         }
+        div#results {
+            text-align: center;
+            width: 800px;
+            margin-right: auto;
+            margin-left: auto;
+        }
     </style>
 
 </head>
 
 <body>
     <div class="blah" id="main">
+    </div>
+    <div class="blah" id="results">
     </div>
     <div class="blah" id="debug">
     </div>
