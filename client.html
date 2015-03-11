@@ -6,6 +6,7 @@
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="http://wulph.com/cw-vote/cw-votejs"></script>
     <script>
     
     var locked = false;
@@ -43,7 +44,7 @@
                 type: "GET",
                 dataType: "json",
                 error: error_func
-            }),
+            })/*,
             $.ajax({
                 url: "http://www.enjin.com/api/v1/api.php",
                 data: {
@@ -52,18 +53,19 @@
                 type: "POST",
                 dataType: "json",
                 error: error_func
-            })
+            })*/
         ).then(drawVoteView);
 
         results();
         $("#debug").html("Test2");
     }
 
-    function drawVoteView(poll_response, vote_response, user_response)
+    //function drawVoteView(poll_response, vote_response, user_response)
+    function drawVoteView(poll_response, vote_response)
     {
         var poll = poll_response[0];
         var vote = vote_response[0];
-        $("#debug").append(JSON.stringify(user_response));
+        //$("#debug").append(JSON.stringify(user_response));
 
 
         $("#main").append("<h2>" + poll.description + "</h2>\n");
