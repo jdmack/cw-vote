@@ -37,6 +37,15 @@
     function onLoad()
     {
         //request_init();
+
+        var request = {
+            "jsonrpc": "2.0",
+            "id": Math.round(Math.random() * (999999 - 100000) + 100000),
+            "method": "User.get",
+            "params": {
+            }
+        };
+
         $.when(
             $.ajax({
                 url: "http://wulph.com/cw-vote/cw-service.php",
@@ -56,35 +65,26 @@
                 type: "GET",
                 dataType: "json",
                 error: error_func
-            })//,
-            //$.ajax({
-            //    url: "http://www.enjin.com/api/v1/api.php",
-            //    data: {
-            //        "jsonrpc": "2.0",
-            //        "id": this_id,
-            //        "method": "User.get",
-            //        "params"": {}
-            //    },
-            //    type: "POST",
-            //    dataType: "json",
-            //    error: error_func
-            //})
+            }),
+            $.post("http://n71.enjin.com/api/v1/api.php", JSON.stringify(request))
         ).then(drawVoteView);
 
         results();
         $("#debug").html("Test2");
     }
 
-    //function drawVoteView(poll_response, vote_response, user_response)
     //******************************************************************************
     //
     //
     //******************************************************************************
-    function drawVoteView(poll_response, vote_response)
+    //function drawVoteView(poll_response, vote_response)
+    function drawVoteView(poll_response, vote_response, user_response)
     {
         var poll = poll_response[0];
         var vote = vote_response[0];
         current_poll = poll;
+        //$("#debug").append(JSON.stringify(user_response));
+
 
         $("#main").append("<h2>" + poll.description + "</h2>\n");
         $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
@@ -200,7 +200,7 @@
         lock_vote();
         var options = array();
         $("li.selected").each(function() {
-            options.push($(this).html();  
+            options.push($(this).html());  
         });
 
         $("#debug").html("cast vote: " + options.join());
