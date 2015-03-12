@@ -12,7 +12,7 @@ runs on Enjin using the Engin API.
 
 ### 3 Selectable Voting Modes
 
-- Single vote - One Member - One Vote (Can just implement as single vote with votes set to 1)
+- Single vote - One Member - One Vote (Can just implement as multi vote with votes set to 1)
 - Multi Vote - One Member - X votes - admin adjustable for number of votes that one member can use, can only vote once for any ballot item
 - Ranked Vote - Member ranks all choices from 1 to X
 
