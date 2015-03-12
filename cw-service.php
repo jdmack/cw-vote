@@ -1,5 +1,6 @@
 <?php
     require_once('cw-bl.php'); date_default_timezone_set('America/Los_Angeles'); // Read request
+    header("Access-Control-Allow-Origin: *");
     /* Actions:
         - create_poll
         - 
