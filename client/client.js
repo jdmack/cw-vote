@@ -25,8 +25,6 @@ google.setOnLoadCallback(function() {
 //******************************************************************************
 function onLoad()
 {
-    //request_init();
-
     var request = {
         "jsonrpc": "2.0",
         "id": Math.round(Math.random() * (999999 - 100000) + 100000),
@@ -34,12 +32,12 @@ function onLoad()
         "params": {
         }
     };
-
+    //request_init();
     $.when(
         $.ajax({
             url: "http://wulph.com/cw-vote/cw-service.php",
             data: {
-                action: "get_current_poll",
+                action: "get_current_poll", 
             },
             type: "GET",
             dataType: "json",
@@ -55,25 +53,27 @@ function onLoad()
             dataType: "json",
             error: error_func
         }),
-        $.post("http://n71.enjin.com/api/v1/api.php", JSON.stringify(request))
+        $.post("/api/v1/api.php", JSON.stringify(request))
+
     ).then(drawVoteView);
 
     results();
-    $("#debug").html("Test2");
+    write_debug("Init");
 }
 
+//function drawVoteView(poll_response, vote_response, user_response)
 //******************************************************************************
 //
 //
 //******************************************************************************
-//function drawVoteView(poll_response, vote_response)
 function drawVoteView(poll_response, vote_response, user_response)
 {
     var poll = poll_response[0];
     var vote = vote_response[0];
     current_poll = poll;
+    username = user_response[0].result.username;
+    write_debug("username: " + username);
     //$("#debug").append(JSON.stringify(user_response));
-
 
     $("#main").append("<h2>" + poll.description + "</h2>\n");
     $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
@@ -198,7 +198,7 @@ function cast_vote()
         url: "http://wulph.com/cw-vote/cw-service.php",
         data: {
             action: "cast_vote",
-            username: $("#username").val(),
+            username: username,
             option: option
         },
         type: "POST",
@@ -244,7 +244,14 @@ function set_click_trigger()
         }
     });
 }
-
+//******************************************************************************
+//
+//
+//******************************************************************************
+function write_debug(message) 
+{
+    $("#debug").append("<p>" + message + "</p>");
+}
 //******************************************************************************
 //
 //
@@ -256,5 +263,4 @@ function error_func(xhr, status, errorThrown)
     console.log("Status: " + status);
     console.dir(xhr);
 }
-
 
