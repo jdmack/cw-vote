@@ -5,7 +5,7 @@ Start Date: 2015-02-25
 
 ## Description
 A JavaScript application for voting functionality to vote for different 
-factions for Community Warfare constracts in MechWarrior Online. Specifically
+factions for Community Warfare contracts in MechWarrior Online. Specifically
 runs on Enjin using the Engin API.
 
 ## Specification
