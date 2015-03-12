@@ -559,6 +559,7 @@
             $options[$name] = $count;
         }
 
+
         $statement->close();
         $connection->close();
 

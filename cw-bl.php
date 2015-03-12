@@ -130,7 +130,6 @@
         }
         $options = dal_selectOptionsByPoll($poll->id);
         $counts = dal_selectVoteCounts($poll->id);
-        //print json_encode($options);
 
         $results = array();
 
