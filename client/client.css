@@ -4,7 +4,12 @@
 .selected:hover {
     background-color: #3333FF;
 }
-
+.locked {
+    background-color: #999999;  
+}
+.locked:hover {
+    background-color: #999999;  
+}
 li {
     background-color: #CCCCCC;  
     width: 150px;

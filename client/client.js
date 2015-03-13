@@ -112,17 +112,11 @@ function drawVoteView(poll_response, vote_response)
     $("#main").append("<h2>" + poll.description + "</h2>\n");
     $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
     $("#main").append("<h3>End: " + poll.end_date + "</h3>\n");
-    $("#main").append("<input type=\"text\" name=\"username\" id=\"username\" value=\"test\"></input><br>\n");
     $("#main").append("<p>Select " + max_votes + " options</p>");
 
     $("#main").append("<ul id=\"vote_list\"></ul>\n");
     for(i = 0; i < poll.options.length; i++) {
-        //if((vote != null) && (vote.option.id == poll.options[i].id)) {
-        //    $("#vote_list").append("<li class=\"selected\" id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
-        //}
-        //else {
         $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
-        //}
     }
 
     $("#main").append("</ul>\n");
@@ -135,6 +129,7 @@ function drawVoteView(poll_response, vote_response)
     }
 
     $("#main").append("<p><button id=\"vote_button\" onclick=\"cast_votes()\">Cast Vote</button></p>\n");
+
     if(votes != null) {
         $("#main").append("<div id=\"message\"><p>You have already voted in this poll. Click below to recast your vote.</p>"
             + "<button id=\"revote_button\" onclick=\"revote()\">Re-vote</button></div>\n");
@@ -143,8 +138,8 @@ function drawVoteView(poll_response, vote_response)
     else {
         $("#main").append("<div id=\"message\"></div>\n");
     }
+
     set_click_trigger();
-    
 }
 
 //******************************************************************************
@@ -208,6 +203,7 @@ function lock_vote()
 {
     //$("#debug").html("lock");
     $("#vote_button").prop("disabled", true);
+    $("li.selected").toggleClass("locked");
     locked = true;
 }
 
@@ -219,6 +215,7 @@ function unlock_vote()
 {
     $("#debug").html("unlock");
     $("#vote_button").prop("disabled", false);
+    $("li.selected").toggleClass("locked");
     locked = false;
 }
 
@@ -228,7 +225,7 @@ function unlock_vote()
 //******************************************************************************
 function cast_votes()
 {
-    lock_vote();
+    $("#message").html("");
     var data = Object;
     var options = Array();
     data.username = username;
@@ -236,6 +233,12 @@ function cast_votes()
     $("li.selected").each(function() {
         options.push($(this).html());  
     });
+
+    if(options.length != max_votes) {
+        $("#message").append("<p>You must select " + max_votes + " options.</p>");
+        return;
+    }
+
     data.options = options;
     data.action = "cast_votes";
 
@@ -261,6 +264,8 @@ function cast_votes()
         },
         error: error_func
     });
+
+    lock_vote();
 }
 
 //******************************************************************************

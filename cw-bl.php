@@ -91,6 +91,8 @@
 
         $existing_votes = dal_selectVotesByPollAndUser($poll->id, $user->id);
 
+        // If you decide to allow for voting of nothing to clear votes, right here do an if $vote_options is 0 and then delete the votes
+
         foreach($vote_options as $this_option) {
             $option = dal_selectOptionByName($this_option);
 
