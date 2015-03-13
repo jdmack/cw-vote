@@ -22,7 +22,7 @@
         }
         else if($action == "get_vote_current") {
             $username = $_GET['username'];
-            $response = bl_getVoteCurrent($username);
+            $response = bl_getVotesCurrent($username);
             print $response;
         }
         else if($action == "get_current_results") {
@@ -34,10 +34,12 @@
     else if(isset($_POST['action'])) {
         $action = $_POST['action'];
 
-        if($action == "cast_vote") {
-            $username = $_POST['username'];
-            $option = $_POST['option'];
-            $response = bl_castVote($username, $option);
+        if($action == "cast_votes") {
+            $json = file_get_contents('php:://input');
+            $object = json_decode($json);
+            //$username = $_POST['username'];
+            //$option = $_POST['option'];
+            $response = bl_castVote($object);
             print $response;
         }
     }

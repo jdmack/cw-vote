@@ -69,7 +69,7 @@ function onLoad()
 function drawVoteView(poll_response, vote_response, user_response)
 {
     var poll = poll_response[0];
-    var vote = vote_response[0];
+    var votes = vote_response[0];
     current_poll = poll;
     username = user_response[0].result.username;
     write_debug("username: " + username);
@@ -83,17 +83,22 @@ function drawVoteView(poll_response, vote_response, user_response)
 
     $("#main").append("<ul id=\"vote_list\"></ul>\n");
     for(i = 0; i < poll.options.length; i++) {
-        if((vote != null) && (vote.option.id == poll.options[i].id)) {
-            $("#vote_list").append("<li class=\"selected\" id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
-        }
-        else {
-            $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
-        }
+        //if((vote != null) && (vote.option.id == poll.options[i].id)) {
+        //    $("#vote_list").append("<li class=\"selected\" id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
+        //}
+        //else {
+        $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
+        //}
     }
 
     $("#main").append("</ul>\n");
 
-    $("#main").append("<p><button id=\"vote_button\" onclick=\"cast_vote()\">Cast Vote</button></p>\n");
+    // "select" the options already voted for
+    for(i = 0; i < votes.length; ++i) {
+        $("#option-" + votes[i].id).addClass("selected");
+    }
+
+    $("#main").append("<p><button id=\"vote_button\" onclick=\"cast_votes()\">Cast Vote</button></p>\n");
     if(vote != null) {
         $("#main").append("<div id=\"message\"><p>You have already voted in this poll. Click below to recast your vote.</p>"
             + "<button id=\"revote_button\" onclick=\"revote()\">Re-vote</button></div>\n");
@@ -184,25 +189,26 @@ function unlock_vote()
 //
 //
 //******************************************************************************
-function cast_vote()
+function cast_votes()
 {
     lock_vote();
+    var data;
     var options = array();
+    data.username = username;
+
     $("li.selected").each(function() {
         options.push($(this).html());  
     });
+    data.options = options;
+    data.action = "cast_votes";
 
     $("#debug").html("cast vote: " + options.join());
 
     $.ajax({
         url: "http://wulph.com/cw-vote/cw-service.php",
-        data: {
-            action: "cast_vote",
-            username: username,
-            option: option
-        },
+        data: JSON.stringify(data),
         type: "POST",
-        dataType: "text",
+        contentType: "application/json",
         success: function(response) {
             $("#debug").append("<br>" + response);
             $("#message").html("");

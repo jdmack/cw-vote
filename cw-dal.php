@@ -61,7 +61,7 @@
         }
         
         // bind parameters
-        $statement->bind_param('siss', $poll->description, $poll->type->id, $poll->start_date, $poll->end_date, $poll->max_votes);
+        $statement->bind_param('sissi', $poll->description, $poll->type->id, $poll->start_date, $poll->end_date, $poll->max_votes);
 
         // execute
         $statement->execute();

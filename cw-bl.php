@@ -26,7 +26,7 @@
     }
 
     //-------------------------------------------------------------------------
-    // bl_getVoteCurrent
+    // bl_getVotesCurrent
     //
     // Parameters:
     //  - BLAH: BLAH - BLAH
@@ -34,8 +34,7 @@
     // Return: BLAH: BLAH - BLAH
     //
     //-------------------------------------------------------------------------
-    // TODO
-    function bl_getVoteCurrent($username)
+    function bl_getVotesCurrent($username)
     {
         $poll = dal_selectPollCurrent();
         $user = dal_selectUserByName($username);
@@ -51,8 +50,8 @@
 
         // If there is current poll, lookup the vote
         if($poll != null) {
-            $vote = dal_selectVoteByPollAndUser($poll->id, $user->id);
-            $json = json_encode($vote);
+            $votes = dal_selectVoteByPollAndUser($poll->id, $user->id);
+            $json = json_encode($votes);
         }
         else {
             $json = json_encode(null);
@@ -71,8 +70,12 @@
     //
     //-------------------------------------------------------------------------
     // TODO
-    function bl_castVote($username, $option_name)
+    //function bl_castVote($username, $option_name)
+    function bl_castVote($object)
     {
+        $username = $object->{'username'};
+        $options = $object->{'options'};
+
         $poll = dal_selectPollCurrent();
         if($poll == null) {
             return "fail:no_poll";
@@ -89,30 +92,39 @@
             $user->id = $user_id;
         }
 
-        $option = dal_selectOptionByName($option_name);
-        if($option == null) {
-            return "fail:bad_option";
-        }
-
         $date = date('c');
 
-        // Check for current vote
-        $vote = dal_selectVoteByPollAndUser($poll->id, $user->id);
-        if($vote != null) {
-            $vote->poll = $poll;
-            $vote->date = $date;
-            $vote->option = $option;
-            dal_updateVote($vote);
-            return "success:updated";
+        $existing_votes = dal_selectVotesByPollAndUser($poll->id, $user->id);
+
+        foreach($options as $this_option) {
+            $option = dal_selectOptionByName($this_option);
+
+            if($option == null) {
+                return "fail:bad_option";
+            }
+            
+            // pop an existing vote off the array of existing votes and update its value to current option
+            $vote = array_pop($existing_votes);
+            
+            // Check for current vote
+            if($vote != null) {
+                $vote->poll = $poll;
+                $vote->date = $date;
+                $vote->option = $option;
+                dal_updateVote($vote);
+                return "success:updated";
+            }
+            else {
+                $vote = new Vote();
+                $vote->poll = $poll;
+                $vote->user = $user;
+                $vote->date = $date;
+                $vote->option = $option;
+                dal_insertVote($vote);
+            }
         }
-        else {
-            $vote->poll = $poll;
-            $vote->user = $user;
-            $vote->date = $date;
-            $vote->option = $option;
-            dal_insertVote($vote);
-            return "success";
-        }
+
+        return "success";
     }
 
     //-------------------------------------------------------------------------

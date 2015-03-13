@@ -10,21 +10,23 @@
 
     date_default_timezone_set('America/Los_Angeles');
 
-    /*
     // INSERT POLL
+    /*
     $poll = new Poll();
-    $poll->description = "Test Poll 3";
+    $poll->description = "Test Poll 1";
     $poll->type = dal_selectPollType(1);
     $poll->start_date = date('c');
     $poll->end_date = date('c', time() + 60 * 60 * 24 * 7);
+    $poll->max_votes = 2;
     $poll_id = dal_insertPoll($poll);
     print "poll_id: $poll_id\n";
+    */
 
+$poll_id = 8;
     $options = dal_selectOptions();
     foreach($options as $option) {
         dal_insertPollOption($poll_id, $option->id);
     }
-    */
 
     $current_poll = dal_selectPollCurrent();
 
