@@ -148,7 +148,6 @@ function drawVoteView(poll_response, vote_response)
 //******************************************************************************
 function results()
 {
-    return;
     // Request results data
     $.ajax({
         url: "http://wulph.com/cw-vote/cw-service.php",
@@ -178,8 +177,9 @@ function drawResults(response)
 
     var options = {
         'title':'Poll Results',
-        'width' : 800,
-        'height': 500
+        'width' : 500,
+        'height': 500,
+        'backgroundColor' : '#EEEEEE'
     };
     var chart = new google.visualization.ColumnChart(document.getElementById('results'));
     chart.draw(data, options);

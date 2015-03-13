@@ -1,17 +1,17 @@
-.selected {
-    background-color: #3333FF;  
-}
-.selected:hover {
+#vote_list > .selected {
     background-color: #3333FF;
 }
-.locked {
-    background-color: #999999;  
+#vote_list > .selected:hover {
+    background-color: #3333FF;
 }
-.locked:hover {
-    background-color: #999999;  
+#vote_list > .locked {
+    background-color: #999999;
 }
-li {
-    background-color: #CCCCCC;  
+#vote_list > .locked:hover {
+    background-color: #999999;
+}
+#vote_list > li {
+    background-color: #CCCCCC;
     width: 150px;
     text-align: left;
     margin: 2px 2px 2px 2px;
@@ -19,7 +19,7 @@ li {
     /*float: left;*/
 }
 
-li:hover {
+#vote_list > li:hover {
     background-color: #FF6666;
 }
 
@@ -27,7 +27,7 @@ ul#vote_list {
     display: inline-block;
     padding: 0;
     list-style-type: none;
-    
+
 }
 
 div#main {
@@ -43,7 +43,8 @@ div#main {
 }
 div#results {
     text-align: center;
-    width: 800px;
+    width: 700px;
     margin-right: auto;
     margin-left: auto;
 }
+
