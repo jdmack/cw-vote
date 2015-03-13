@@ -505,13 +505,13 @@
         
         $statement->fetch();
         $poll = dal_selectPoll($poll_id);
-
+        $user = dal_selectUser($user_id);
         do {
             // create return object
             $vote = new Vote();
             $vote->id = $id;
-            $vote->poll = $poll;
-            $vote->user = dal_selectUser($user_id);
+            //$vote->poll = $poll;
+            $vote->user = $user;
             $vote->date = $date;
             $vote->option = dal_selectOption($option_id);
             $vote->value = $value;

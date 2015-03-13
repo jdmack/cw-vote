@@ -1,4 +1,6 @@
 // Globals
+var development = true;
+
 var locked = false;
 var username;
 var current_poll;
@@ -9,21 +11,38 @@ var max_votes = 1;
 google.load('visualization', '1.0', {'packages':['corechart']});
 google.setOnLoadCallback(function() {
     $(function() {
-        onLoad();
+        on_load();
     });
 });
 
 // Old way of loading from before using Google Charts
 //$(document).ready(function() {
-//    onLoad();
+//    on_load();
 //});
 
+//******************************************************************************
+//
+//
+//******************************************************************************
+function on_load()
+{
+    if(development) {
+        write_debug("Development Environment");
+
+        username = "test";
+        request_poll_info();
+    }
+    else {
+        write_debug("Production Environment");
+        request_user_info();
+    }
+}
 
 //******************************************************************************
 //
 //
 //******************************************************************************
-function onLoad()
+function request_user_info()
 {
     var request = {
         "jsonrpc": "2.0",
@@ -32,7 +51,25 @@ function onLoad()
         "params": {
         }
     };
-    //request_init();
+    write_debug("Requesting Enjin User Info");
+    $.post("/api/v1/api.php", JSON.stringify(request), function(response) {
+        if(response.result) {
+            //username = user_response[0].result.username;
+            username = response.result.username;
+        }
+        else {
+            username = "MISSING";
+        }
+        request_poll_info();
+    });
+}
+
+//******************************************************************************
+//
+//
+//******************************************************************************
+function request_poll_info()
+{
     $.when(
         $.ajax({
             url: "http://wulph.com/cw-vote/cw-service.php",
@@ -46,34 +83,31 @@ function onLoad()
         $.ajax({
             url: "http://wulph.com/cw-vote/cw-service.php",
             data: {
-                action: "get_vote_current",
-                username: $("#username").val()
+                action: "get_votes_current",
+                username: username
             },
             type: "GET",
             dataType: "json",
             error: error_func
-        }),
-        $.post("/api/v1/api.php", JSON.stringify(request))
-
+        })
     ).then(drawVoteView);
 
     results();
     write_debug("Init");
 }
 
-//function drawVoteView(poll_response, vote_response, user_response)
 //******************************************************************************
 //
 //
 //******************************************************************************
-function drawVoteView(poll_response, vote_response, user_response)
+function drawVoteView(poll_response, vote_response)
 {
     var poll = poll_response[0];
     var votes = vote_response[0];
     current_poll = poll;
-    username = user_response[0].result.username;
+    max_votes = poll.max_votes;
     write_debug("username: " + username);
-    //$("#debug").append(JSON.stringify(user_response));
+    $("#debug").append("votes: " + JSON.stringify(votes));
 
     $("#main").append("<h2>" + poll.description + "</h2>\n");
     $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
@@ -94,12 +128,14 @@ function drawVoteView(poll_response, vote_response, user_response)
     $("#main").append("</ul>\n");
 
     // "select" the options already voted for
-    for(i = 0; i < votes.length; ++i) {
-        $("#option-" + votes[i].id).addClass("selected");
+    if(votes != null) {
+        for(i = 0; i < votes.length; ++i) {
+            $("#option-" + votes[i].option.id).addClass("selected");
+        }
     }
 
     $("#main").append("<p><button id=\"vote_button\" onclick=\"cast_votes()\">Cast Vote</button></p>\n");
-    if(vote != null) {
+    if(votes != null) {
         $("#main").append("<div id=\"message\"><p>You have already voted in this poll. Click below to recast your vote.</p>"
             + "<button id=\"revote_button\" onclick=\"revote()\">Re-vote</button></div>\n");
             lock_vote();
@@ -117,6 +153,7 @@ function drawVoteView(poll_response, vote_response, user_response)
 //******************************************************************************
 function results()
 {
+    return;
     // Request results data
     $.ajax({
         url: "http://wulph.com/cw-vote/cw-service.php",
@@ -192,8 +229,8 @@ function unlock_vote()
 function cast_votes()
 {
     lock_vote();
-    var data;
-    var options = array();
+    var data = Object;
+    var options = Array();
     data.username = username;
 
     $("li.selected").each(function() {
@@ -206,13 +243,17 @@ function cast_votes()
 
     $.ajax({
         url: "http://wulph.com/cw-vote/cw-service.php",
-        data: JSON.stringify(data),
+        data: {
+            action: "cast_votes",
+            username: username,
+            options: JSON.stringify(options)
+        },
         type: "POST",
-        contentType: "application/json",
+        //contentType: "application/json",
         success: function(response) {
             $("#debug").append("<br>" + response);
             $("#message").html("");
-            $("#message").append("<p>Your vote for " + option + " was submitted.</p>");
+            $("#message").append("<p>Your vote for " + options.join(', ') + " was submitted.</p>");
             $("#message").append("<p>Click below to recast your vote.</p>"
                 + "<button id=\"revote_button\" onclick=\"revote()\">Re-vote</button></div>\n");
             results();
@@ -229,6 +270,7 @@ function cast_votes()
 function set_click_trigger() 
 {
     $("li").click(function() {
+        //write_debug("max_votes: " + max_votes);
         if(locked) { return; }
         if(max_votes == 1) {
             if($(this).hasClass("selected")) {

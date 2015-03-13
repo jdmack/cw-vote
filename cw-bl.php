@@ -50,7 +50,7 @@
 
         // If there is current poll, lookup the vote
         if($poll != null) {
-            $votes = dal_selectVoteByPollAndUser($poll->id, $user->id);
+            $votes = dal_selectVotesByPollAndUser($poll->id, $user->id);
             $json = json_encode($votes);
         }
         else {
@@ -69,13 +69,8 @@
     // Return: BLAH: BLAH - BLAH
     //
     //-------------------------------------------------------------------------
-    // TODO
-    //function bl_castVote($username, $option_name)
-    function bl_castVote($object)
+    function bl_castVotes($username, $vote_options)
     {
-        $username = $object->{'username'};
-        $options = $object->{'options'};
-
         $poll = dal_selectPollCurrent();
         if($poll == null) {
             return "fail:no_poll";
@@ -96,7 +91,7 @@
 
         $existing_votes = dal_selectVotesByPollAndUser($poll->id, $user->id);
 
-        foreach($options as $this_option) {
+        foreach($vote_options as $this_option) {
             $option = dal_selectOptionByName($this_option);
 
             if($option == null) {
@@ -104,7 +99,12 @@
             }
             
             // pop an existing vote off the array of existing votes and update its value to current option
-            $vote = array_pop($existing_votes);
+            if($existing_votes == null) {
+                $vote = null;
+            }
+            else {
+                $vote = array_pop($existing_votes);
+            }
             
             // Check for current vote
             if($vote != null) {
@@ -112,7 +112,6 @@
                 $vote->date = $date;
                 $vote->option = $option;
                 dal_updateVote($vote);
-                return "success:updated";
             }
             else {
                 $vote = new Vote();
@@ -144,6 +143,10 @@
         }
         $options = dal_selectOptionsByPoll($poll->id);
         $counts = dal_selectVoteCounts($poll->id);
+
+        if($counts == null) {
+            return null;
+        }
 
         $results = array();
 

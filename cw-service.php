@@ -12,6 +12,7 @@
     if(isset($_GET['action'])) {
         $action = $_GET['action'];
         //echo "action: $action\n";
+        error_log("[CW-VOTE] [GET] $action");
 
         // Perform request
         if($action == "get_current_poll")
@@ -20,7 +21,7 @@
             $response = bl_getCurrentPoll();
             print $response;
         }
-        else if($action == "get_vote_current") {
+        else if($action == "get_votes_current") {
             $username = $_GET['username'];
             $response = bl_getVotesCurrent($username);
             print $response;
@@ -33,13 +34,14 @@
 
     else if(isset($_POST['action'])) {
         $action = $_POST['action'];
+        error_log("[CW-VOTE] [POST] $action");
 
         if($action == "cast_votes") {
-            $json = file_get_contents('php:://input');
-            $object = json_decode($json);
-            //$username = $_POST['username'];
-            //$option = $_POST['option'];
-            $response = bl_castVote($object);
+            //$json = file_get_contents('php:://input');
+            //$object = json_decode($json);
+            $username = $_POST['username'];
+            $options = json_decode($_POST['options']);
+            $response = bl_castVotes($username, $options);
             print $response;
         }
     }
