@@ -52,7 +52,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "INSERT INTO poll (description, type, start_date, end_date) VALUES (?, ?, ?, ?)";
+        $query = "INSERT INTO poll (description, type, start_date, end_date, max_votes) VALUES (?, ?, ?, ?, ?)";
 
         // Prepare statement
         $statement = $connection->prepare($query);
@@ -61,7 +61,7 @@
         }
         
         // bind parameters
-        $statement->bind_param('siss', $poll->description, $poll->type->id, $poll->start_date, $poll->end_date);
+        $statement->bind_param('siss', $poll->description, $poll->type->id, $poll->start_date, $poll->end_date, $poll->max_votes);
 
         // execute
         $statement->execute();
@@ -93,7 +93,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT description, type, start_date, end_date FROM poll WHERE id = ?";
+        $query = "SELECT description, type, start_date, end_date, max_votes FROM poll WHERE id = ?";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -109,7 +109,7 @@
         $statement->execute();
         
         // get results
-        $statement->bind_result($description, $type_id, $start_date, $end_date);
+        $statement->bind_result($description, $type_id, $start_date, $end_date, $max_votes);
         $statement->fetch();
 
         // create return object
@@ -119,6 +119,7 @@
         $poll->type = dal_selectPollType($type_id);
         $poll->start_date = $start_date;
         $poll->end_date = $end_date;
+        $poll->max_votes = $max_votes;
 
         $poll->options = dal_selectOptionsByPoll($id);
 
@@ -142,7 +143,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT id, description, type, start_date, end_date FROM poll WHERE start_date < ? AND end_date > ?";
+        $query = "SELECT id, description, type, start_date, end_date, max_votes FROM poll WHERE start_date < ? AND end_date > ?";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -165,7 +166,7 @@
             return null;
         }
 
-        $statement->bind_result($id, $description, $type_id, $start_date, $end_date);
+        $statement->bind_result($id, $description, $type_id, $start_date, $end_date, $max_votes);
         $statement->fetch();
 
         // create return object
@@ -176,6 +177,7 @@
         $poll->start_date = $start_date;
         $poll->end_date = $end_date;
         $poll->options = dal_selectOptionsByPoll($id);
+        $poll->max_votes = $max_votes;
 
         $statement->close();
         $connection->close();
@@ -463,7 +465,7 @@
     }
 
     //-------------------------------------------------------------------------
-    // dal_selectVoteByPollAndUser
+    // dal_selectVotesByPollAndUser
     // 
     // Parameters:
     //  - BLAH: BLAH - BLAH
@@ -471,8 +473,7 @@
     // Return: BLAH: BLAH - BLAH
     // 
     //-------------------------------------------------------------------------
-    // TODO - Test
-    function dal_selectVoteByPollAndUser($poll_id, $user_id)
+    function dal_selectVotesByPollAndUser($poll_id, $user_id)
     {
         $connection = dal_createConnection();
 
@@ -496,25 +497,32 @@
         if($statement->num_rows <= 0) {
             return null;
         }
-        
+
         // get results
         $statement->bind_result($id, $poll_id, $user_id, $date, $option_id, $value);
 
+        $votes = array();
+        
         $statement->fetch();
-
-        // create return object
-        $vote = new Vote();
-        $vote->id = $id;
         $poll = dal_selectPoll($poll_id);
-        $vote->user = dal_selectUser($user_id);
-        $vote->date = $date;
-        $vote->option = dal_selectOption($option_id);
-        $vote->value = $value;
+
+        do {
+            // create return object
+            $vote = new Vote();
+            $vote->id = $id;
+            $vote->poll = $poll;
+            $vote->user = dal_selectUser($user_id);
+            $vote->date = $date;
+            $vote->option = dal_selectOption($option_id);
+            $vote->value = $value;
+
+            array_push($votes, $vote);
+        } while($statement->fetch());
 
         $statement->close();
         $connection->close();
 
-        return $vote;
+        return $votes;
     }
 
     //-------------------------------------------------------------------------
@@ -558,7 +566,6 @@
         while($statement->fetch()) {
             $options[$name] = $count;
         }
-
 
         $statement->close();
         $connection->close();

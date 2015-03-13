@@ -3,7 +3,8 @@ CREATE TABLE poll (
     description VARCHAR(100),
     type INT REFERENCES poll_type(id),
     start_date DATETIME,
-    end_date DATETIME
+    end_date DATETIME,
+    max_votes INT
 );
 
 CREATE TABLE user (

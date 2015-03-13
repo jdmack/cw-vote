@@ -34,6 +34,7 @@
     // Return: BLAH: BLAH - BLAH
     //
     //-------------------------------------------------------------------------
+    // TODO
     function bl_getVoteCurrent($username)
     {
         $poll = dal_selectPollCurrent();
@@ -69,6 +70,7 @@
     // Return: BLAH: BLAH - BLAH
     //
     //-------------------------------------------------------------------------
+    // TODO
     function bl_castVote($username, $option_name)
     {
         $poll = dal_selectPollCurrent();
