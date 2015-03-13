@@ -124,6 +124,8 @@
                 dal_insertVote($vote);
             }
         }
+        // TODO: get the "success:update" response working again
+        // TODO: Do something if there are extra $existing_votes that weren't popped
 
         return "success";
     }
