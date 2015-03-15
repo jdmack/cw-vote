@@ -1,5 +1,6 @@
 // Globals
 var development = true;
+var env = "dev";
 
 var locked = false;
 var username;
@@ -30,10 +31,12 @@ function on_load()
         write_debug("Development Environment");
 
         username = "test";
+        env = "dev";
         request_poll_info();
     }
     else {
         write_debug("Production Environment");
+        env = "prod";
         request_user_info();
     }
 }
@@ -75,6 +78,7 @@ function request_poll_info()
             url: "http://wulph.com/cw-vote/cw-service.php",
             data: {
                 action: "get_current_poll", 
+                env: env
             },
             type: "GET",
             dataType: "json",
@@ -84,13 +88,14 @@ function request_poll_info()
             url: "http://wulph.com/cw-vote/cw-service.php",
             data: {
                 action: "get_votes_current",
-                username: username
+                username: username,
+                env: env
             },
             type: "GET",
             dataType: "json",
             error: error_func
         })
-    ).then(drawVoteView);
+    ).then(draw_vote_view);
 
     results();
     write_debug("Init");
@@ -100,33 +105,58 @@ function request_poll_info()
 //
 //
 //******************************************************************************
-function drawVoteView(poll_response, vote_response)
+function draw_vote_view(poll_response, vote_response)
 {
     var poll = poll_response[0];
     var votes = vote_response[0];
+
     current_poll = poll;
     max_votes = poll.max_votes;
+
     write_debug("username: " + username);
-    $("#debug").append("votes: " + JSON.stringify(votes));
+    //$("#debug").append("votes: " + JSON.stringify(votes));
 
     $("#main").append("<h2>" + poll.description + "</h2>\n");
     $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
     $("#main").append("<h3>End: " + poll.end_date + "</h3>\n");
-    $("#main").append("<p>Select " + max_votes + " options</p>");
 
-    $("#main").append("<ul id=\"vote_list\"></ul>\n");
-    for(i = 0; i < poll.options.length; i++) {
-        $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
-    }
+    // Multivote 
+    if(poll.type.name == "multivote") {
+        $("#main").append("<p>Select " + max_votes + " options</p>");
+        $("#main").append("<ul id=\"vote_list\"></ul>\n");
 
-    $("#main").append("</ul>\n");
-
-    // "select" the options already voted for
-    if(votes != null) {
-        for(i = 0; i < votes.length; ++i) {
-            $("#option-" + votes[i].option.id).addClass("selected");
+        for(i = 0; i < poll.options.length; i++) {
+            $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
         }
+
+        $("#main").append("</ul>\n");
+
+        // "select" the options already voted for
+        if(votes != null) {
+            for(i = 0; i < votes.length; ++i) {
+                $("#option-" + votes[i].option.id).addClass("selected");
+            }
+        }
+        set_click_trigger();
     }
+    // Ranked
+    else if(poll.type.name == "ranked") {
+        $("#main").append("<p>Rank the following items via click and drag.</p>");
+        $("#main").append("<ul id=\"vote_list\"></ul>\n");
+
+        for(i = 0; i < poll.options.length; i++) {
+            $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
+        }
+
+        $("#main").append("</ul>\n");
+
+        // TODO: Reorder the items based on previous votes
+        
+        $("#vote_list").sortable();
+    }
+
+    // Disable text selection
+    $("#vote_list").disableSelection();
 
     $("#main").append("<p><button id=\"vote_button\" onclick=\"cast_votes()\">Cast Vote</button></p>\n");
 
@@ -139,7 +169,6 @@ function drawVoteView(poll_response, vote_response)
         $("#main").append("<div id=\"message\"></div>\n");
     }
 
-    set_click_trigger();
 }
 
 //******************************************************************************
@@ -153,10 +182,11 @@ function results()
         url: "http://wulph.com/cw-vote/cw-service.php",
         data: {
             action: "get_current_results",
+            env: env
         },
         type: "GET",
         dataType: "json",
-        success: drawResults,
+        success: draw_results,
         error: error_func
     });
 
@@ -165,8 +195,9 @@ function results()
 //
 //
 //******************************************************************************
-function drawResults(response)
+function draw_results(response)
 {
+    // TODO: Determine how to display results for ranked poll
     var data = new google.visualization.DataTable();
     data.addColumn('string', 'Faction');
     data.addColumn('number', 'Votes');
@@ -203,7 +234,12 @@ function lock_vote()
 {
     //$("#debug").html("lock");
     $("#vote_button").prop("disabled", true);
-    $("li.selected").toggleClass("locked");
+    if(poll.type.name == "multivote") {
+        $("li.selected").toggleClass("locked");
+    }
+    else if(poll.type.name == "ranked") {
+        $("#vote_list").disable();
+    }
     locked = true;
 }
 
@@ -215,7 +251,14 @@ function unlock_vote()
 {
     $("#debug").html("unlock");
     $("#vote_button").prop("disabled", false);
-    $("li.selected").toggleClass("locked");
+
+    if(poll.type.name == "multivote") {
+        $("li.selected").toggleClass("locked");
+    }
+    else if(poll.type.name == "ranked") {
+        $("#vote_list").enable();
+    }
+
     locked = false;
 }
 
@@ -225,11 +268,13 @@ function unlock_vote()
 //******************************************************************************
 function cast_votes()
 {
+    // TODO: Cast votes for ranked
     $("#message").html("");
     var data = Object;
     var options = Array();
     data.username = username;
 
+    if(poll.type.name == "multivote") {
     $("li.selected").each(function() {
         options.push($(this).html());  
     });
@@ -241,6 +286,7 @@ function cast_votes()
 
     data.options = options;
     data.action = "cast_votes";
+    }
 
     $("#debug").html("cast vote: " + options.join());
 
@@ -249,7 +295,8 @@ function cast_votes()
         data: {
             action: "cast_votes",
             username: username,
-            options: JSON.stringify(options)
+            options: JSON.stringify(options),
+            env: env
         },
         type: "POST",
         //contentType: "application/json",
