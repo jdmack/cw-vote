@@ -13,7 +13,15 @@
         global $db_username;
         global $db_password;
 
-        $mysqli = new mysqli($host, $db_username, $db_password, $dbname);
+        $this_dbname = $dbname;
+
+        if(isset($_SESSION['db-env'])) {
+            if($_SESSION['db-env'] == 'dev') {
+                $this_dbname += '_dev';
+            }
+        }
+
+        $mysqli = new mysqli($host, $db_username, $db_password, $this_dbname);
 
         if($mysqli->connect_error) {
             printf("Connect failed: %s\n", $mysqli->connect_error);

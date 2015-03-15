@@ -11,6 +11,8 @@
     */
     if(isset($_GET['action'])) {
         $action = $_GET['action'];
+        $_SESSION['db-env'] = $_POST['env'];
+
         //echo "action: $action\n";
         error_log("[CW-VOTE] [GET] $action");
 
@@ -34,6 +36,7 @@
 
     else if(isset($_POST['action'])) {
         $action = $_POST['action'];
+        $_SESSION['db-env'] = $_POST['env'];
         error_log("[CW-VOTE] [POST] $action");
 
         if($action == "cast_votes") {
