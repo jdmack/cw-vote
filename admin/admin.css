@@ -1,16 +1,10 @@
-#vote_list > .selected {
+.selected {
     background-color: #3333FF;
 }
-#vote_list > .selected:hover {
+.selected:hover {
     background-color: #3333FF;
 }
-#vote_list > .locked {
-    background-color: #999999;
-}
-#vote_list > .locked:hover {
-    background-color: #999999;
-}
-#vote_list > li {
+li {
     background-color: #CCCCCC;
     width: 150px;
     text-align: left;
@@ -18,33 +12,37 @@
     padding: 2px 2px 2px 2px;
     /*float: left;*/
 }
-
-#vote_list > li:hover {
+li:hover {
     background-color: #FF6666;
 }
-
-ul#vote_list {
+ul.options {
     display: inline-block;
     padding: 0;
     list-style-type: none;
 
 }
-
 div#main {
-    color: black;
+    float: left;
+    display: inline-block;
     background-color: #EEEEEE;
+    width: 500px;
     font-weight: bold;
     /*font-size: 40px; */
     text-align: center;
-    width: 500px;
     margin-right: auto;
     margin-left: auto;
     padding: 5px 5px 5px 5px;
 }
-div#results {
+div#options {
+    float: left;
+    display: inline-block;
+    background-color: #DDDDDD;
+    width: 200px;
+    font-weight: bold;
+    /*font-size: 40px; */
     text-align: center;
-    width: 500px;
     margin-right: auto;
     margin-left: auto;
+    padding: 5px 5px 5px 5px;
 }
 
