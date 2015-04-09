@@ -5,43 +5,30 @@
 var development = false;
 var env = "dev";
 
-var username;
-var current_poll;
-var max_votes = 1;
-
-
-// Load function, have to do it this way for Google Charts
-//google.load('visualization', '1.0', {'packages':['corechart']});
-//google.setOnLoadCallback(function() {
-//    $(function() {
-//        on_load();
-//    });
-//});
-
 // Old way of loading from before using Google Charts
 $(document).ready(function() {
-    on_load();
+    admin_on_load();
 });
 
 //******************************************************************************
 //
 //
 //******************************************************************************
-function on_load()
+function admin_on_load()
 {
     // Set click triggers for options menu
-    $("#option-current-poll").click(init_current_poll);
-    $("#option-create-poll").click(init_create_poll);
-    set_click_trigger();
+    $("#option-current-poll").click(admin_init_current_poll);
+    $("#option-create-poll").click(admin_init_create_poll);
+    admin_set_click_trigger();
     if(development) {
-        write_debug("Development Environment");
+        admin_write_debug("Development Environment");
 
         username = "test";
         env = "dev";
         //request_current_poll();
     }
     else {
-        write_debug("Production Environment");
+        admin_write_debug("Production Environment");
         env = "prod";
         //request_user_info();
     }
@@ -52,35 +39,35 @@ function on_load()
 //
 //
 //******************************************************************************
-function init_current_poll()
+function admin_init_current_poll()
 {
     // Clear main window
     $("#admin-main").html("");
     
     $("#admin-main").append("<h2>Current Poll</h2>");
 
-    request_current_poll();
+    admin_request_current_poll();
 }
 
 //******************************************************************************
 //
 //
 //******************************************************************************
-function init_create_poll()
+function admin_init_create_poll()
 {
     // Clear main window
     $("#admin-main").html("");
     
     $("#admin-main").append("<h2>Create Poll</h2>");
 
-    request_options(draw_create_poll);
+    admin_request_options(admin_draw_create_poll);
 }
 
 //******************************************************************************
 //
 //
 //******************************************************************************
-function draw_create_poll(options_response)
+function admin_draw_create_poll(options_response)
 {
     var options = options_response;
 
@@ -126,7 +113,7 @@ function draw_create_poll(options_response)
     $('#admin-main-body').append($('<p></p>').append($('<input type=\"submit\" id=\"admin-create-poll-button\" value=\"Create Poll\" />')));
 
     $('#admin-create-poll-button').click(function(event) {
-        write_debug("Creating Poll");
+        admin_write_debug("Creating Poll");
 
         $.ajax({
             url: "http://wulph.com/cw-vote/cw-service.php",
@@ -153,7 +140,7 @@ function draw_create_poll(options_response)
                     $("#admin-main-body").append("<p>Error creating poll, tell WolfBro.</p>");
                 }
             },
-            error: error_func
+            error: admin_error_func
         });
     });
 
@@ -163,9 +150,9 @@ function draw_create_poll(options_response)
 //
 //
 //******************************************************************************
-function request_options(callback)
+function admin_request_options(callback)
 {
-    write_debug("Requesting Options");
+    admin_write_debug("Requesting Options");
     $.ajax({
         url: "http://wulph.com/cw-vote/cw-service.php",
         data: {
@@ -175,7 +162,7 @@ function request_options(callback)
         type: "GET",
         dataType: "json",
         success: callback,
-        error: error_func
+        error: admin_error_func
     });
 }
 
@@ -183,7 +170,7 @@ function request_options(callback)
 //
 //
 //****************************************************************************** 
-function request_user_info()
+function admin_request_user_info()
 {
     var request = {
         "jsonrpc": "2.0",
@@ -192,7 +179,7 @@ function request_user_info()
         "params": {
         }
     };
-    write_debug("Requesting Enjin User Info");
+    admin_write_debug("Requesting Enjin User Info");
     $.post("/api/v1/api.php", JSON.stringify(request), function(response) {
         if(response.result) {
             //username = user_response[0].result.username;
@@ -209,9 +196,9 @@ function request_user_info()
 //
 //
 //******************************************************************************
-function request_current_poll()
+function admin_request_current_poll()
 {
-    write_debug("Requesting current poll");
+    admin_write_debug("Requesting current poll");
     //$.when(
         $.ajax({
             url: "http://wulph.com/cw-vote/cw-service.php",
@@ -221,8 +208,8 @@ function request_current_poll()
             },
             type: "GET",
             dataType: "json",
-            success: draw_current_poll,
-            error: error_func
+            success: admin_draw_current_poll,
+            error: admin_error_func
         });//,
         //$.ajax({
         //    url: "http://wulph.com/cw-vote/cw-service.php",
@@ -233,19 +220,19 @@ function request_current_poll()
         //    },
         //    type: "GET",
         //    //dataType: "json",
-        //    error: error_func
+        //    error: admin_error_func
         //})
     //).then(draw_vote_view);
 
     //results();
-    write_debug("Init");
+    admin_write_debug("Init");
 }
 
 //******************************************************************************
 //
 //
 //******************************************************************************
-function draw_current_poll(poll_response)
+function admin_draw_current_poll(poll_response)
 {
     //var poll = poll_response[0];
     var poll = poll_response;
@@ -277,117 +264,12 @@ function draw_current_poll(poll_response)
 
 }
 
-//******************************************************************************
-//
-//
-//******************************************************************************
-function results()
-{
-    // Request results data
-    $.ajax({
-        url: "http://wulph.com/cw-vote/cw-service.php",
-        data: {
-            action: "get_current_results",
-            env: env
-        },
-        type: "GET",
-        //dataType: "json",
-        success: draw_results,
-        error: error_func
-    });
-
-}
-//******************************************************************************
-//
-//
-//******************************************************************************
-function draw_results(response)
-{
-    // TODO: Determine how to display results for ranked poll
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Faction');
-    data.addColumn('number', 'Votes');
-
-    for(var key in response) {
-        data.addRow([key, response[key]]);
-    }
-
-    var options = {
-        'title':'Poll Results',
-        'width' : 500,
-        'height': 500,
-        'backgroundColor' : '#EEEEEE'
-    };
-    var chart = new google.visualization.ColumnChart(document.getElementById('results'));
-    chart.draw(data, options);
-}
 
 //******************************************************************************
 //
 //
 //******************************************************************************
-function cast_votes()
-{
-    // TODO: Cast votes for ranked
-    $("#message").html("");
-    var options = Array();
-
-    if(current_poll.type.name == "multivote") {
-
-        $("li.selected").each(function() {
-            options.push($(this).html());  
-        });
-
-        if(options.length != max_votes) {
-            $("#message").append("<p>You must select " + max_votes + " options.</p>");
-            return;
-        }
-
-        $("#debug").html("cast vote: " + options.join());
-    }
-    else if(current_poll.type.name == "ranked") {
-        var count = 1;
-        
-        $("#vote_list > li").each(function() {
-            var this_option = Object;
-            this_option.name = $(this).html();
-            this_option.value = count;
-            options.push(this_option);
-            ++count;
-        });
-    }
-
-    $.ajax({
-        url: "http://wulph.com/cw-vote/cw-service.php",
-        data: {
-            action: "cast_votes",
-            username: username,
-            options: JSON.stringify(options),
-            env: env,
-            poll_type: current_poll.type.name
-        },
-        type: "POST",
-        //contentType: "application/json",
-        success: function(response) {
-            $("#debug").append("<br>" + response);
-            $("#message").html("");
-            $("#message").append("<p>Your vote for " + options.join(', ') + " was submitted.</p>");
-            $("#message").append("<p>Click below to recast your vote.</p>"
-                + "<button id=\"revote_button\" onclick=\"revote()\">Re-vote</button></div>\n");
-            results();
-
-        },
-        error: error_func
-    });
-
-    lock_vote();
-}
-
-//******************************************************************************
-//
-//
-//******************************************************************************
-function set_click_trigger() 
+function admin_set_click_trigger() 
 {
     $("li").click(function() {
         if($(this).hasClass("selected")) {
@@ -404,7 +286,7 @@ function set_click_trigger()
 //
 //
 //******************************************************************************
-function write_debug(message) 
+function admin_write_debug(message) 
 {
     $("#admin-debug").append("<p>" + message + "</p>");
 }
@@ -412,9 +294,9 @@ function write_debug(message)
 //
 //
 //******************************************************************************
-function error_func(xhr, status, errorThrown) 
+function admin_error_func(xhr, status, errorThrown) 
 {
-    write_debug("ERROR: " + status + " - " + errorThrown);
+    admin_write_debug("ERROR: " + status + " - " + errorThrown);
     console.log("Error: " + errorThrown);
     console.log("Status: " + status);
     console.dir(xhr);
