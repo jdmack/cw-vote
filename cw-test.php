@@ -1,5 +1,6 @@
 <?php
     include_once('cw-dal.php');
+    include_once('cw-bl.php');
     include_once('cw-config.php');
 
     include_once('objects/option.php');
@@ -13,7 +14,7 @@
     // INSERT POLL
     /*
     $poll = new Poll();
-    $poll->description = "Test Poll 1";
+    $poll->description = "Test Poll 2";
     $poll->type = dal_selectPollType(1);
     $poll->start_date = date('c');
     $poll->end_date = date('c', time() + 60 * 60 * 24 * 7);
@@ -22,14 +23,14 @@
     print "poll_id: $poll_id\n";
     */
 
-$poll_id = 8;
-    $options = dal_selectOptions();
-    foreach($options as $option) {
-        dal_insertPollOption($poll_id, $option->id);
-    }
+    //$poll_id = 9;
+    //$options = dal_selectOptions();
+    //foreach($options as $option) {
+    //    dal_insertPollOption($poll_id, $option->id);
+    //}
 
-    $current_poll = dal_selectPollCurrent();
-
+    //$current_poll = dal_selectPollCurrent();
+    bl_closeCurrentPolls();
     // INSERT VOTE
     /*
     $vote = new Vote();

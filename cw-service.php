@@ -32,6 +32,10 @@
             $response = bl_getCurrentPollResults();
             print $response;
         }
+        else if($action == "get_options") {
+            $response = bl_getOptions();
+            print $response;
+        }
     }
 
     else if(isset($_POST['action'])) {
@@ -45,6 +49,17 @@
             $username = $_POST['username'];
             $options = json_decode($_POST['options']);
             $response = bl_castVotes($username, $options);
+            print $response;
+        }
+        else if($action == "create_poll") {
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+            $start = $_POST['start'];
+            $end = $_POST['end'];
+            $type = $_POST['type'];
+            $max_votes = $_POST['max_votes'];
+            $options = json_decode($_POST['options']);
+            $response = bl_createPoll($name, $description, $start, $end, $type, $max_votes, $options);
             print $response;
         }
     }

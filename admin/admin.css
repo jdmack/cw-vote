@@ -1,31 +1,41 @@
-.selected {
+.options > .selected {
     background-color: #3333FF;
 }
-.selected:hover {
+.options > .selected:hover {
     background-color: #3333FF;
 }
-li {
+ul#admin-option-view-list > li {
+    //width: 100px;
     background-color: #CCCCCC;
-    width: 150px;
     text-align: left;
     margin: 2px 2px 2px 2px;
     padding: 2px 2px 2px 2px;
     /*float: left;*/
 }
-li:hover {
+.options > li:hover {
     background-color: #FF6666;
 }
 ul.options {
     display: inline-block;
     padding: 0;
     list-style-type: none;
-
 }
-div#main {
+
+ul#admin-option-view-list {
+    display: inline-block;
+    padding: 0;
+    list-style-type: none;
+}
+div#admin-container {
+    background-color: #DDDDDD;
+    display: inline-block;
+}
+div#admin-main {
+    width: 500px;
+    //height: 500px;
     float: left;
     display: inline-block;
     background-color: #EEEEEE;
-    width: 500px;
     font-weight: bold;
     /*font-size: 40px; */
     text-align: center;
@@ -33,16 +43,17 @@ div#main {
     margin-left: auto;
     padding: 5px 5px 5px 5px;
 }
-div#options {
+div#admin-options {
+    //width: 100px;
+    height: 500px;
     float: left;
     display: inline-block;
     background-color: #DDDDDD;
-    width: 200px;
     font-weight: bold;
-    /*font-size: 40px; */
+    //font-size: 40px;
     text-align: center;
     margin-right: auto;
     margin-left: auto;
-    padding: 5px 5px 5px 5px;
+    padding: 0px 0px 0px 0px;
 }
 

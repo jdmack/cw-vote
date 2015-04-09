@@ -2,27 +2,26 @@
 
 
 // Globals
-var development = true;
+var development = false;
 var env = "dev";
 
-var locked = false;
 var username;
 var current_poll;
 var max_votes = 1;
 
 
 // Load function, have to do it this way for Google Charts
-google.load('visualization', '1.0', {'packages':['corechart']});
-google.setOnLoadCallback(function() {
-    $(function() {
-        on_load();
-    });
-});
+//google.load('visualization', '1.0', {'packages':['corechart']});
+//google.setOnLoadCallback(function() {
+//    $(function() {
+//        on_load();
+//    });
+//});
 
 // Old way of loading from before using Google Charts
-//$(document).ready(function() {
-//    on_load();
-//});
+$(document).ready(function() {
+    on_load();
+});
 
 //******************************************************************************
 //
@@ -30,24 +29,160 @@ google.setOnLoadCallback(function() {
 //******************************************************************************
 function on_load()
 {
+    // Set click triggers for options menu
+    $("#option-current-poll").click(init_current_poll);
+    $("#option-create-poll").click(init_create_poll);
+    set_click_trigger();
     if(development) {
         write_debug("Development Environment");
 
         username = "test";
         env = "dev";
-        request_poll_info();
+        //request_current_poll();
     }
     else {
         write_debug("Production Environment");
         env = "prod";
-        request_user_info();
+        //request_user_info();
     }
+    $("#option-current-poll").trigger("click");
 }
 
 //******************************************************************************
 //
 //
 //******************************************************************************
+function init_current_poll()
+{
+    // Clear main window
+    $("#admin-main").html("");
+    
+    $("#admin-main").append("<h2>Current Poll</h2>");
+
+    request_current_poll();
+}
+
+//******************************************************************************
+//
+//
+//******************************************************************************
+function init_create_poll()
+{
+    // Clear main window
+    $("#admin-main").html("");
+    
+    $("#admin-main").append("<h2>Create Poll</h2>");
+
+    request_options(draw_create_poll);
+}
+
+//******************************************************************************
+//
+//
+//******************************************************************************
+function draw_create_poll(options_response)
+{
+    var options = options_response;
+
+    $("#admin-main").append("<div id=\"admin-main-body\"></div>");
+    $("#admin-main-body").append("<p>Note: This will auto-close any open polls.</p>");
+    $("#admin-main-body").append("<table id=\"admin-input-table\"></table>");
+
+    // Name
+    $('#admin-input-table').append($('<tr></tr>').append($('<td></td>').html("<label for=\"admin-input-poll-name\">Name</label")).append(
+        "<input type=\"text\" name=\"poll-name\" id=\"admin-input-poll-name\" />"));
+
+    // Description
+    $('#admin-input-table').append($('<tr></tr>').append($('<td></td>').html("<label for=\"admin-input-poll-description\">Description</label")).append(
+        "<input type=\"text\" name=\"poll-description\" id=\"admin-input-poll-description\" />"));
+
+    // Start
+    $('#admin-input-table').append($('<tr></tr>').append($('<td></td>').html("<label for=\"admin-input-poll-start\">Start</label")).append(
+        "<input type=\"text\" name=\"poll-start\" id=\"admin-input-poll-start\" />"));
+    $('#admin-input-poll-start').datepicker();
+
+    // End
+    $('#admin-input-table').append($('<tr></tr>').append($('<td></td>').html("<label for=\"admin-input-poll-end\">End</label")).append(
+        "<input type=\"text\" name=\"poll-end\" id=\"admin-input-poll-end\" />"));
+    $('#admin-input-poll-end').datepicker();
+
+    // Poll Type
+    $('#admin-input-table').append($('<tr></tr>').append($('<td></td>').html("<label for=\"admin-input-poll-type\">Poll Type</label")).append(
+        "<select name=\"poll-type\" id=\"admin-input-poll-type\"></select>"));
+    $('#admin-input-poll-type').append('<option value=\"multivote\">Multi-vote</option>');
+    $('#admin-input-poll-type').append('<option value=\"ranked\">Ranked</option>');
+
+    // Max-Votes
+    $('#admin-input-table').append($('<tr></tr>').append($('<td></td>').html("<label for=\"admin-input-poll-max-votes\">Max-Votes</label")).append(
+        "<input type=\"text\" name=\"poll-max-votes\" id=\"admin-input-poll-max-votes\" />"));
+
+    // Start
+    $('#admin-input-table').append($('<tr></tr>').append($('<td></td>').html("<label for=\"admin-input-poll-options\">Options</label")).append(
+        "<select name=\"poll-optinos\" id=\"admin-input-poll-options\" multiple=\"multiple\"></select>"));
+
+    for(var i = 0; i < options.length; ++i) {
+        $('#admin-input-poll-options').append('<option value=\"' + options[i].name + '\">' + options[i].name + '</option>');
+    }
+    $('#admin-main-body').append($('<p></p>').append($('<input type=\"submit\" id=\"admin-create-poll-button\" value=\"Create Poll\" />')));
+
+    $('#admin-create-poll-button').click(function(event) {
+        write_debug("Creating Poll");
+
+        $.ajax({
+            url: "http://wulph.com/cw-vote/cw-service.php",
+            data: {
+                action: "create_poll",
+                name: $('#admin-input-poll-name').val(),
+                description: $('#admin-input-poll-description').val(),
+                start: $('#admin-input-poll-start').val(),
+                end: $('#admin-input-poll-end').val(),
+                type: $('#admin-input-poll-type').val(),
+                max_votes: $('#admin-input-poll-max-votes').val(),
+                options: JSON.stringify($('#admin-input-poll-options').val()),
+                env: env,
+            },
+            type: "POST",
+            //contentType: "application/json",
+            success: function(response) {
+                $("#admin-debug").append("<br>" + response);
+                $("#admin-main-body").html("");
+                if(response == "success") {
+                    $("#admin-main-body").append("<p>Poll created successfully.</p>");
+                }
+                else {
+                    $("#admin-main-body").append("<p>Error creating poll, tell WolfBro.</p>");
+                }
+            },
+            error: error_func
+        });
+    });
+
+}
+
+//******************************************************************************
+//
+//
+//******************************************************************************
+function request_options(callback)
+{
+    write_debug("Requesting Options");
+    $.ajax({
+        url: "http://wulph.com/cw-vote/cw-service.php",
+        data: {
+            action: "get_options", 
+            env: env
+        },
+        type: "GET",
+        dataType: "json",
+        success: callback,
+        error: error_func
+    });
+}
+
+//******************************************************************************
+//
+//
+//****************************************************************************** 
 function request_user_info()
 {
     var request = {
@@ -66,7 +201,7 @@ function request_user_info()
         else {
             username = "MISSING";
         }
-        request_poll_info();
+        //request_current_poll();
     });
 }
 
@@ -74,9 +209,10 @@ function request_user_info()
 //
 //
 //******************************************************************************
-function request_poll_info()
+function request_current_poll()
 {
-    $.when(
+    write_debug("Requesting current poll");
+    //$.when(
         $.ajax({
             url: "http://wulph.com/cw-vote/cw-service.php",
             data: {
@@ -84,23 +220,24 @@ function request_poll_info()
                 env: env
             },
             type: "GET",
-            //dataType: "json",
+            dataType: "json",
+            success: draw_current_poll,
             error: error_func
-        }),
-        $.ajax({
-            url: "http://wulph.com/cw-vote/cw-service.php",
-            data: {
-                action: "get_votes_current",
-                username: username,
-                env: env
-            },
-            type: "GET",
-            //dataType: "json",
-            error: error_func
-        })
-    ).then(draw_vote_view);
+        });//,
+        //$.ajax({
+        //    url: "http://wulph.com/cw-vote/cw-service.php",
+        //    data: {
+        //        action: "get_votes_current",
+        //        username: username,
+        //        env: env
+        //    },
+        //    type: "GET",
+        //    //dataType: "json",
+        //    error: error_func
+        //})
+    //).then(draw_vote_view);
 
-    results();
+    //results();
     write_debug("Init");
 }
 
@@ -108,73 +245,34 @@ function request_poll_info()
 //
 //
 //******************************************************************************
-function draw_vote_view(poll_response, vote_response)
+function draw_current_poll(poll_response)
 {
-    var poll = poll_response[0];
-    var votes = vote_response[0];
+    //var poll = poll_response[0];
+    var poll = poll_response;
 
     current_poll = poll;
-    max_votes = poll.max_votes;
 
-    write_debug("username: " + username);
-    //$("#debug").append("votes: " + JSON.stringify(votes));
-
-    if(poll == "null") {
-        $("#main").append("<h2>There is no current poll</h2>");
+    if(poll == null) {
+        $("#admin-main").append("<h2>There is no current poll</h2>");
     }
     else {
-        $("#main").append("<h2>" + poll.description + "</h2>\n");
-        $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
-        $("#main").append("<h3>End: " + poll.end_date + "</h3>\n");
+        //$("#admin-main").append(JSON.stringify(poll, null, 4));
 
-        // Multivote 
+        $("#admin-main").append("<h2>" + poll.name + "</h2>\n");
+        $("#admin-main").append("<h3>" + poll.description + "</h3>\n");
+        $("#admin-main").append("<h3>Start: " + poll.start_date + "</h3>\n");
+        $("#admin-main").append("<h3>End: " + poll.end_date + "</h3>\n");
+        $("#admin-main").append("<h3>Poll Type: " + poll.type.name + "</h3>\n");
         if(poll.type.name == "multivote") {
-            $("#main").append("<p>Select " + max_votes + " options</p>");
-            $("#main").append("<ul id=\"vote_list\"></ul>\n");
-
-            for(i = 0; i < poll.options.length; i++) {
-                $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
-            }
-
-            $("#main").append("</ul>\n");
-
-            // "select" the options already voted for
-            if(votes != null) {
-                for(i = 0; i < votes.length; ++i) {
-                    $("#option-" + votes[i].option.id).addClass("selected");
-                }
-            }
-            set_click_trigger();
+            $("#admin-main").append("<h3>Max Votes: " + poll.max_votes + "</h3>\n");
         }
-        // Ranked
-        else if(poll.type.name == "ranked") {
-            $("#main").append("<p>Rank the following items via click and drag.</p>");
-            $("#main").append("<ul id=\"vote_list\"></ul>\n");
+        $("#admin-main").append("<ul id=\"admin-option-view-list\"></ul>\n");
 
-            for(i = 0; i < poll.options.length; i++) {
-                $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
-            }
-
-            $("#main").append("</ul>\n");
-
-            // TODO: Reorder the items based on previous votes
-            
-            $("#vote_list").sortable();
-        }
-
+        for(i = 0; i < poll.options.length; i++) {
+            $("#admin-option-view-list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
+        } $("#admin-main").append("</ul>\n"); 
         // Disable text selection
-        $("#vote_list").disableSelection();
-
-        $("#main").append("<p><button id=\"vote_button\" onclick=\"cast_votes()\">Cast Vote</button></p>\n");
-
-        if(votes != null) {
-            $("#main").append("<div id=\"message\"><p>You have already voted in this poll. Click below to recast your vote.</p>"
-                + "<button id=\"revote_button\" onclick=\"revote()\">Re-vote</button></div>\n");
-                lock_vote();
-        }
-        else {
-            $("#main").append("<div id=\"message\"></div>\n");
-        }
+        //$("#admin-option-view-list").disableSelection();
     }
 
 }
@@ -222,52 +320,6 @@ function draw_results(response)
     };
     var chart = new google.visualization.ColumnChart(document.getElementById('results'));
     chart.draw(data, options);
-}
-
-//******************************************************************************
-//
-//
-//******************************************************************************
-function revote()
-{
-    $("#message").html("");
-    unlock_vote();
-}
-
-//******************************************************************************
-//
-//
-//******************************************************************************
-function lock_vote()
-{
-    //$("#debug").html("lock");
-    $("#vote_button").prop("disabled", true);
-    if(poll.type.name == "multivote") {
-        $("li.selected").toggleClass("locked");
-    }
-    else if(poll.type.name == "ranked") {
-        $("#vote_list").disable();
-    }
-    locked = true;
-}
-
-//******************************************************************************
-//
-//
-//******************************************************************************
-function unlock_vote()
-{
-    $("#debug").html("unlock");
-    $("#vote_button").prop("disabled", false);
-
-    if(poll.type.name == "multivote") {
-        $("li.selected").toggleClass("locked");
-    }
-    else if(poll.type.name == "ranked") {
-        $("#vote_list").enable();
-    }
-
-    locked = false;
 }
 
 //******************************************************************************
@@ -338,25 +390,13 @@ function cast_votes()
 function set_click_trigger() 
 {
     $("li").click(function() {
-        //write_debug("max_votes: " + max_votes);
-        if(locked) { return; }
-        if(max_votes == 1) {
-            if($(this).hasClass("selected")) {
-                $("li").removeClass("selected");
-                 
-            }
-            else {
-                $("li").removeClass("selected");
-                $(this).addClass("selected");
-            }
+        if($(this).hasClass("selected")) {
+            $("li").removeClass("selected");
+             
         }
         else {
-            if($(this).hasClass("selected")) {
-                $(this).toggleClass("selected");
-            }
-            else if($("li.selected").size() < max_votes) {
-                $(this).toggleClass("selected");
-            }
+            $("li").removeClass("selected");
+            $(this).addClass("selected");
         }
     });
 }
@@ -366,7 +406,7 @@ function set_click_trigger()
 //******************************************************************************
 function write_debug(message) 
 {
-    $("#debug").append("<p>" + message + "</p>");
+    $("#admin-debug").append("<p>" + message + "</p>");
 }
 //******************************************************************************
 //
@@ -374,7 +414,7 @@ function write_debug(message)
 //******************************************************************************
 function error_func(xhr, status, errorThrown) 
 {
-    alert("Request Problem");
+    write_debug("ERROR: " + status + " - " + errorThrown);
     console.log("Error: " + errorThrown);
     console.log("Status: " + status);
     console.dir(xhr);

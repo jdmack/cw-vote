@@ -15,11 +15,15 @@
 
         $this_dbname = $dbname;
 
+        /*
         if(isset($_SESSION['db-env'])) {
             if($_SESSION['db-env'] == 'dev') {
                 $this_dbname += '_dev';
             }
         }
+        */
+        //error_log("[CW-VOTE] [DB] database: $this_dbname");
+
 
         $mysqli = new mysqli($host, $db_username, $db_password, $this_dbname);
 
@@ -60,7 +64,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "INSERT INTO poll (description, type, start_date, end_date, max_votes) VALUES (?, ?, ?, ?, ?)";
+        $query = "INSERT INTO poll (name, description, type, start_date, end_date, max_votes) VALUES (?, ?, ?, ?, ?, ?)";
 
         // Prepare statement
         $statement = $connection->prepare($query);
@@ -69,7 +73,7 @@
         }
         
         // bind parameters
-        $statement->bind_param('sissi', $poll->description, $poll->type->id, $poll->start_date, $poll->end_date, $poll->max_votes);
+        $statement->bind_param('ssissi', $poll->name, $poll->description, $poll->type->id, $poll->start_date, $poll->end_date, $poll->max_votes);
 
         // execute
         $statement->execute();
@@ -101,7 +105,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT description, type, start_date, end_date, max_votes FROM poll WHERE id = ?";
+        $query = "SELECT name, description, type, start_date, end_date, max_votes FROM poll WHERE id = ?";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -117,12 +121,13 @@
         $statement->execute();
         
         // get results
-        $statement->bind_result($description, $type_id, $start_date, $end_date, $max_votes);
+        $statement->bind_result($name, $description, $type_id, $start_date, $end_date, $max_votes);
         $statement->fetch();
 
         // create return object
         $poll = new Poll();
         $poll->id = $id;
+        $poll->name = $name;
         $poll->description = $description;
         $poll->type = dal_selectPollType($type_id);
         $poll->start_date = $start_date;
@@ -139,6 +144,54 @@
     }
 
     //-------------------------------------------------------------------------
+    // dal_updatePoll
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_updatePoll($poll)
+    {
+        $connection = dal_createConnection();
+
+        $query = "UPDATE poll SET name = ?, description = ?, type = ?, start_date = ?, end_date = ?, max_votes = ? WHERE id = ?";
+
+        // Prepare statement
+        $statement = $connection->prepare($query);
+        if($statement == false) {
+            trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+        
+        // bind parameters
+        $statement->bind_param('ssissii', 
+            $poll->name,
+            $poll->description,
+            $poll->type->id, 
+            $poll->start_date,
+            $poll->end_date,
+            $poll->max_votes,
+            $poll->id);
+
+        // execute
+        $statement->execute();
+
+        $return_value;
+        if($statement->affected_rows > 0) {
+            $return_value = $statement->insert_id;
+        }
+        else {
+            echo "No Results Found";
+            $return_value = null;
+        }
+        $statement->close();
+        $connection->close();
+
+        return $return_value;
+    }
+
+    //-------------------------------------------------------------------------
     // dal_selectPollCurrent
     // 
     // Parameters:
@@ -151,7 +204,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT id, description, type, start_date, end_date, max_votes FROM poll WHERE start_date < ? AND end_date > ?";
+        $query = "SELECT id, name, description, type, start_date, end_date, max_votes FROM poll WHERE start_date < ? AND end_date > ?";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -168,29 +221,29 @@
         $statement->execute();
 
         // get results
-        $statement->store_result();
+        $statement->bind_result($id, $name, $description, $type_id, $start_date, $end_date, $max_votes);
 
-        if($statement->num_rows <= 0) {
-            return null;
+        $polls = array();
+
+        while($statement->fetch()) {
+            // create return object
+            $poll = new Poll();
+            $poll->id = $id;
+            $poll->name = $name;
+            $poll->description = $description;
+            $poll->type = dal_selectPollType($type_id);
+            $poll->start_date = $start_date;
+            $poll->end_date = $end_date;
+            $poll->options = dal_selectOptionsByPoll($id);
+            $poll->max_votes = $max_votes;
+
+            array_push($polls, $poll);
         }
-
-        $statement->bind_result($id, $description, $type_id, $start_date, $end_date, $max_votes);
-        $statement->fetch();
-
-        // create return object
-        $poll = new Poll();
-        $poll->id = $id;
-        $poll->description = $description;
-        $poll->type = dal_selectPollType($type_id);
-        $poll->start_date = $start_date;
-        $poll->end_date = $end_date;
-        $poll->options = dal_selectOptionsByPoll($id);
-        $poll->max_votes = $max_votes;
 
         $statement->close();
         $connection->close();
     
-        return $poll;
+        return $polls;
     }
 
     //-------------------------------------------------------------------------
@@ -956,6 +1009,52 @@
 
         // bind parameters
         $statement->bind_param('i', $id);
+          
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->bind_result($id, $name);
+
+        $poll_types = array();
+
+        $statement->fetch();
+
+        // create return object
+        $poll_type = new PollType();
+        $poll_type->id = $id;
+        $poll_type->name = $name;
+
+        $statement->close();
+        $connection->close();
+
+        return $poll_type;
+    }
+
+    //-------------------------------------------------------------------------
+    // dal_selectPollTypeByName
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_selectPollTypeByName($name)
+    {
+        $connection = dal_createConnection();
+
+        $query = "SELECT id, name FROM poll_type WHERE name = ?";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+
+        // bind parameters
+        $statement->bind_param('s', $name);
           
         // execute
         $statement->execute();

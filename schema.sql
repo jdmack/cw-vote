@@ -1,6 +1,7 @@
 CREATE TABLE poll (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    description VARCHAR(100),
+    name VARCHAR(1000),
+    description VARCHAR(1000),
     type INT REFERENCES poll_type(id),
     start_date DATETIME,
     end_date DATETIME,

@@ -84,7 +84,7 @@ function request_poll_info()
                 env: env
             },
             type: "GET",
-            //dataType: "json",
+            dataType: "json",
             error: error_func
         }),
         $.ajax({
@@ -95,7 +95,7 @@ function request_poll_info()
                 env: env
             },
             type: "GET",
-            //dataType: "json",
+            dataType: "json",
             error: error_func
         })
     ).then(draw_vote_view);
@@ -242,11 +242,11 @@ function lock_vote()
 {
     //$("#debug").html("lock");
     $("#vote_button").prop("disabled", true);
-    if(poll.type.name == "multivote") {
+    if(current_poll.type.name == "multivote") {
         $("li.selected").toggleClass("locked");
     }
-    else if(poll.type.name == "ranked") {
-        $("#vote_list").disable();
+    else if(current_poll.type.name == "ranked") {
+        $("#vote_list").sortable("disable");
     }
     locked = true;
 }
@@ -260,11 +260,11 @@ function unlock_vote()
     $("#debug").html("unlock");
     $("#vote_button").prop("disabled", false);
 
-    if(poll.type.name == "multivote") {
+    if(current_poll.type.name == "multivote") {
         $("li.selected").toggleClass("locked");
     }
-    else if(poll.type.name == "ranked") {
-        $("#vote_list").enable();
+    else if(current_poll.type.name == "ranked") {
+        $("#vote_list").sortable("enable");
     }
 
     locked = false;
@@ -294,15 +294,17 @@ function cast_votes()
         $("#debug").html("cast vote: " + options.join());
     }
     else if(current_poll.type.name == "ranked") {
-        var count = 1;
+        var count = $('#vote_list > li').length;
         
         $("#vote_list > li").each(function() {
-            var this_option = Object;
-            this_option.name = $(this).html();
-            this_option.value = count;
+            var this_option = {
+                name: $(this).html(),
+                value: count
+            };
             options.push(this_option);
-            ++count;
+            --count;
         });
+        write_debug(JSON.stringify(options));
     }
 
     $.ajax({
@@ -319,7 +321,12 @@ function cast_votes()
         success: function(response) {
             $("#debug").append("<br>" + response);
             $("#message").html("");
-            $("#message").append("<p>Your vote for " + options.join(', ') + " was submitted.</p>");
+            if(current_poll.type.name == "multivote") {
+                $("#message").append("<p>Your vote for " + options.join(', ') + " was submitted.</p>");
+            }
+            else {
+                $("#message").append("<p>Your vote was submitted.</p>");
+            }
             $("#message").append("<p>Click below to recast your vote.</p>"
                 + "<button id=\"revote_button\" onclick=\"revote()\">Re-vote</button></div>\n");
             results();
@@ -372,11 +379,10 @@ function write_debug(message)
 //
 //
 //******************************************************************************
-function error_func(xhr, status, errorThrown) 
+function error_func(xhr, status, errorThrown)
 {
-    alert("Request Problem");
+    write_debug("ERROR: " + status + " - " + errorThrown);
     console.log("Error: " + errorThrown);
     console.log("Status: " + status);
     console.dir(xhr);
 }
-

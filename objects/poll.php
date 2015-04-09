@@ -3,6 +3,7 @@
 class Poll
 {
     public $id;
+    public $name;
     public $description;
     public $type;
     public $start_date;
