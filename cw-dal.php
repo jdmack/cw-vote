@@ -599,7 +599,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT option.name, SUM(*) FROM vote, option WHERE vote.option = option.id AND vote.poll = ? group by option.name";
+        $query = "SELECT option.name, COUNT(*) FROM vote, option WHERE vote.option = option.id AND vote.poll = ? group by option.name";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -647,7 +647,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT option.name, SUM(value) FROM vote, option WHERE vote.option = option.id AND vote.poll = ? group by option.name";
+        $query = "SELECT option.name, SUM(IFNULL(value, 0) FROM vote, option WHERE vote.option = option.id AND vote.poll = ? group by option.name";
          
         // prepare statement
         $statement = $connection->prepare($query);

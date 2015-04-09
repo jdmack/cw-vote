@@ -241,7 +241,9 @@
         else {
             $poll = array_pop($polls);
         }
+
         $options = dal_selectOptionsByPoll($poll->id);
+
         if($poll->type->name == "multivote") {
             $counts = dal_selectVoteCounts($poll->id);
         }
@@ -250,11 +252,12 @@
         }
 
         if($counts == null) {
-            return null;
+            //error_log("[CW-VOTE] [DEBUG] here");
+            return "null";
         }
 
         $results = array();
-
+        
         foreach($options as $option) {
             $count = 0;
             if(array_key_exists($option->name, $counts)) {
@@ -263,6 +266,7 @@
             $results[$option->name] = $count;
         }
         
+
         $json = json_encode($results);
         return $json;
     }

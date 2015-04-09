@@ -205,23 +205,28 @@ function results()
 //******************************************************************************
 function draw_results(response)
 {
-    // TODO: Determine how to display results for ranked poll
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Faction');
-    data.addColumn('number', 'Votes');
-
-    for(var key in response) {
-        data.addRow([key, response[key]]);
+    if(response == null) {
+        $('#results').append("<p>No results to show.</p>");
     }
+    else {
+        // TODO: Determine how to display results for ranked poll
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Faction');
+        data.addColumn('number', 'Votes');
 
-    var options = {
-        'title':'Poll Results',
-        'width' : 500,
-        'height': 500,
-        'backgroundColor' : '#EEEEEE'
-    };
-    var chart = new google.visualization.ColumnChart(document.getElementById('results'));
-    chart.draw(data, options);
+        for(var key in response) {
+            data.addRow([key, response[key]]);
+        }
+
+        var options = {
+            'title':'Poll Results',
+            'width' : 500,
+            'height': 500,
+            'backgroundColor' : '#EEEEEE'
+        };
+        var chart = new google.visualization.ColumnChart(document.getElementById('results'));
+        chart.draw(data, options);
+    }
 }
 
 //******************************************************************************
