@@ -193,7 +193,7 @@ function results()
             env: env
         },
         type: "GET",
-        //dataType: "json",
+        dataType: "json",
         success: draw_results,
         error: error_func
     });

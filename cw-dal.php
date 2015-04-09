@@ -599,7 +599,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT option.name, count(*) FROM vote, option WHERE vote.option = option.id AND vote.poll = ? group by option.name";
+        $query = "SELECT option.name, SUM(*) FROM vote, option WHERE vote.option = option.id AND vote.poll = ? group by option.name";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -633,6 +633,55 @@
 
         return $options;
     }
+
+    //-------------------------------------------------------------------------
+    // dal_selectVoteScores
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_selectVoteScores($poll)
+    {
+        $connection = dal_createConnection();
+
+        $query = "SELECT option.name, SUM(value) FROM vote, option WHERE vote.option = option.id AND vote.poll = ? group by option.name";
+         
+        // prepare statement
+        $statement = $connection->prepare($query);
+
+        if($statement === false) {
+              trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+
+        // bind parameters
+        $statement->bind_param('i', $poll);
+          
+        // execute
+        $statement->execute();
+        
+        // get results
+        $statement->store_result();
+        $statement->bind_result($name, $count);
+
+        if($statement->num_rows <= 0) {
+            return null;
+        }
+
+        $options = array();
+
+        while($statement->fetch()) {
+            $options[$name] = $count;
+        }
+
+        $statement->close();
+        $connection->close();
+
+        return $options;
+    }
+
     //-------------------------------------------------------------------------
     // dal_insertOption
     // 

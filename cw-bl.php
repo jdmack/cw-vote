@@ -242,7 +242,12 @@
             $poll = array_pop($polls);
         }
         $options = dal_selectOptionsByPoll($poll->id);
-        $counts = dal_selectVoteCounts($poll->id);
+        if($poll->type->name == "multivote") {
+            $counts = dal_selectVoteCounts($poll->id);
+        }
+        else if($poll->type->name == "ranked") {
+            $counts = dal_selectVoteScores($poll->id);
+        }
 
         if($counts == null) {
             return null;
