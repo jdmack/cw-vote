@@ -123,6 +123,7 @@ function draw_vote_view(poll_response, vote_response)
         $("#main").append("<h2>There is no current poll</h2>");
     }
     else {
+        $("#main").append("<h1>" + poll.name + "</h1>\n");
         $("#main").append("<h2>" + poll.description + "</h2>\n");
         $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
         $("#main").append("<h3>End: " + poll.end_date + "</h3>\n");

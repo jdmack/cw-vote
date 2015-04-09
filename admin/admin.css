@@ -45,7 +45,8 @@ div#admin-main {
 }
 div#admin-options {
     //width: 100px;
-    height: 500px;
+    //height: 500px;
+    height: 100px;
     float: left;
     display: inline-block;
     background-color: #DDDDDD;
@@ -59,4 +60,13 @@ div#admin-options {
 
 div#admin-container {
     color: black;
+}
+
+table#admin-input-table {
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+}
+div#admin-main-body {
+    text-align: center;
 }
