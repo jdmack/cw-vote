@@ -24,7 +24,8 @@ CREATE TABLE vote (
 
 CREATE TABLE option (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100)
+    name VARCHAR(100),
+    standard TINYINT(1) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE poll_option (

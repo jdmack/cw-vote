@@ -62,6 +62,7 @@ function request_user_info()
         if(response.result) {
             //username = user_response[0].result.username;
             username = response.result.username;
+            write_debug("User Received: " + username);
         }
         else {
             username = "MISSING";

@@ -362,4 +362,41 @@
         $poll->end_date = date('c');
         dal_updatePoll($poll);
     }
+
+    //-------------------------------------------------------------------------
+    // bl_addOption
+    //
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    //
+    //-------------------------------------------------------------------------
+    function bl_addOption($option_name)
+    {
+        $option = new Option();
+        $option->name = $option_name;
+        dal_insertOption($option);
+        return "success: " . $option_name;
+    }
+
+    //-------------------------------------------------------------------------
+    // bl_deleteOption
+    //
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    //
+    //-------------------------------------------------------------------------
+    function bl_deleteOption($option_name)
+    {
+        $num_deleted = dal_deleteOptionByName($option_name);
+        if($num_deleted > 0) {
+        return "success: " . $option_name;
+        }
+        else {
+            return "failed";
+        }
+    }
 ?>

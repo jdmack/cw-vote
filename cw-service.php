@@ -62,6 +62,16 @@
             $response = bl_createPoll($name, $description, $start, $end, $type, $max_votes, $options);
             print $response;
         }
+        else if($action == "add_option") {
+            $option_name = $_POST['option_name'];
+            $response = bl_addOption($option_name);
+            print $response;
+        }
+        else if($action == "delete_option") {
+            $option_name = $_POST['option_name'];
+            $response = bl_deleteOption($option_name);
+            print $response;
+        }
     }
 
     else {

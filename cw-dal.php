@@ -736,7 +736,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT name FROM option WHERE id = ?";
+        $query = "SELECT name, standard FROM option WHERE id = ?";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -752,13 +752,14 @@
         $statement->execute();
         
         // get results
-        $statement->bind_result($name);
+        $statement->bind_result($name, $standard);
         $statement->fetch();
 
         // create return object
         $option = new Option();
         $option->id = $id;
         $option->name = $name;
+        $option->standard = $standard;
     
         $statement->close();
         $connection->close();
@@ -780,7 +781,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT id, name FROM option";
+        $query = "SELECT id, name, standard FROM option";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -793,7 +794,7 @@
         $statement->execute();
         
         // get results
-        $statement->bind_result($id, $name);
+        $statement->bind_result($id, $name, $standard);
 
         $options = array();
 
@@ -802,6 +803,7 @@
             $option = new Option();
             $option->id = $id;
             $option->name = $name;
+            $option->standard = $standard;
 
             array_push($options, $option);
         }
@@ -825,7 +827,7 @@
     {
         $connection = dal_createConnection();
 
-        $query = "SELECT id, name FROM option WHERE name = ?";
+        $query = "SELECT id, name, standard FROM option WHERE name = ?";
          
         // prepare statement
         $statement = $connection->prepare($query);
@@ -846,18 +848,53 @@
         if($statement->num_rows <= 0) {
             return null;
         }
-        $statement->bind_result($id, $name);
+        $statement->bind_result($id, $name, $standard);
         $statement->fetch();
 
         // create return object
         $option = new Option();
         $option->id = $id;
         $option->name = $name;
+        $option->standard = $standard;
     
         $statement->close();
         $connection->close();
 
         return $option;
+    }
+
+    //-------------------------------------------------------------------------
+    // dal_deleteOptionByName
+    // 
+    // Parameters:
+    //  - BLAH: BLAH - BLAH
+    //
+    // Return: BLAH: BLAH - BLAH
+    // 
+    //-------------------------------------------------------------------------
+    function dal_deleteOptionByName($option_name)
+    {
+        $connection = dal_createConnection();
+
+        $query = "DELETE FROM option WHERE name= ?";
+
+        // Prepare statement
+        $statement = $connection->prepare($query);
+        if($statement == false) {
+            trigger_error('Wrong SQL: ' . $query . ' Error: ' . $connection->error, E_USER_ERROR);
+        }
+        
+        // bind parameters
+        $statement->bind_param('s', $option_name);
+
+        // execute
+        $statement->execute();
+
+        $return_value = $statement->affected_rows;
+        $statement->close();
+        $connection->close();
+
+        return $return_value;
     }
 
     //-------------------------------------------------------------------------
