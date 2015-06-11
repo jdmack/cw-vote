@@ -17,7 +17,8 @@ $(document).ready(function() {
 function admin_on_load()
 {
     // TESTING
-
+    //$('head').append('<link href="http://wulph.com/cw-vote/css/multiselect.css" media="screen" rel="stylesheet" type="text/css">');
+    //$('head').append('<link href="http://wulph.com/cw-vote/css/jquery.countdown.css" rel="stylesheet" type="text/css">');
 
     // Set click triggers for options menu
     $("#option-current-poll").click(admin_init_current_poll);
