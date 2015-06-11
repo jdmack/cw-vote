@@ -131,7 +131,7 @@ function draw_vote_view(poll_response, vote_response)
         $("#main").append("<h2>" + poll.description + "</h2>\n");
         $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
         $("#main").append("<h3>End: " + poll.end_date + "</h3>\n");
-        $("#main").append("<span id=\"client-poll-countdown\" class=\"countdown\"></span><br><br>");
+        $("#main").append("<div id=\"client-poll-countdown\"></div>");
 
          // Setup countdown
          var countdownDate = new Date(poll.end_date);
@@ -152,7 +152,7 @@ function draw_vote_view(poll_response, vote_response)
             // "select" the options already voted for
             if(votes != null) {
                 for(i = 0; i < votes.length; ++i) {
-                    $("#option-" + votes[i].option.id).addClass("selected");
+                    $("li#option-" + votes[i].option.id).addClass("selected");
                 }
             }
             set_click_trigger();
@@ -259,7 +259,7 @@ function lock_vote()
     //$("#debug").html("lock");
     $("#vote_button").prop("disabled", true);
     if(current_poll.type.name == "multivote") {
-        $("li.selected").toggleClass("locked");
+        $("#vote_list > li.selected").toggleClass("locked");
     }
     else if(current_poll.type.name == "ranked") {
         $("#vote_list").sortable("disable");
@@ -277,7 +277,7 @@ function unlock_vote()
     $("#vote_button").prop("disabled", false);
 
     if(current_poll.type.name == "multivote") {
-        $("li.selected").toggleClass("locked");
+        $("#vote_list > li.selected").toggleClass("locked");
     }
     else if(current_poll.type.name == "ranked") {
         $("#vote_list").sortable("enable");

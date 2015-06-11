@@ -71,5 +71,10 @@ div#admin-main-body {
     text-align: center;
 }
 
-#admin-poll-countdown {
+div#admin-poll-countdown {
+    width: 200px;
+    height: 45px;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
 }
