@@ -298,7 +298,7 @@ function cast_votes()
 
     if(current_poll.type.name == "multivote") {
 
-        $("li.selected").each(function() {
+        $("#vote_list > li.selected").each(function() {
             options.push($(this).html());  
         });
 
@@ -377,7 +377,7 @@ function set_click_trigger()
             if($(this).hasClass("selected")) {
                 $(this).toggleClass("selected");
             }
-            else if($("li.selected").size() < max_votes) {
+            else if($("#vote_list > li.selected").size() < max_votes) {
                 $(this).toggleClass("selected");
             }
         }
