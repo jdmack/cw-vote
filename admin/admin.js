@@ -2,7 +2,7 @@
 
 
 // Globals
-var development = false;
+var development = true;
 var env = "dev";
 
 // Old way of loading from before using Google Charts
@@ -34,6 +34,7 @@ function admin_on_load()
         admin_write_debug("Production Environment");
         env = "prod";
         //request_user_info();
+        $('#admin-debug').hide();
     }
     $("#option-current-poll").trigger("click");
 }

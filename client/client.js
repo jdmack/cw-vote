@@ -30,6 +30,8 @@ google.setOnLoadCallback(function() {
 //******************************************************************************
 function on_load()
 {
+    //$('head').append('<link href="http://wulph.com/cw-vote/css/jquery.countdown.css" rel="stylesheet" type="text/css">');
+
     if(development) {
         write_debug("Development Environment");
 
@@ -41,6 +43,7 @@ function on_load()
         write_debug("Production Environment");
         env = "prod";
         request_user_info();
+        $('#debug').hide();
     }
 }
 
@@ -128,6 +131,12 @@ function draw_vote_view(poll_response, vote_response)
         $("#main").append("<h2>" + poll.description + "</h2>\n");
         $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
         $("#main").append("<h3>End: " + poll.end_date + "</h3>\n");
+        $("#main").append("<span id=\"client-poll-countdown\" class=\"countdown\"></span><br><br>");
+
+         // Setup countdown
+         var countdownDate = new Date(poll.end_date);
+         $('#client-poll-countdown').countdown({until: countdownDate});
+
 
         // Multivote 
         if(poll.type.name == "multivote") {
