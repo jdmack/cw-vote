@@ -88,7 +88,7 @@ function request_poll_info()
                 env: env
             },
             type: "GET",
-            //dataType: "json",
+            dataType: "json",
             error: error_func
         }),
         $.ajax({
@@ -99,7 +99,7 @@ function request_poll_info()
                 env: env
             },
             type: "GET",
-            //dataType: "json",
+            dataType: "json",
             error: error_func
         })
     ).then(draw_vote_view);
@@ -204,7 +204,7 @@ function results()
             env: env
         },
         type: "GET",
-        //dataType: "json",
+        dataType: "json",
         success: draw_results,
         error: error_func
     });
