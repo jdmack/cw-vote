@@ -88,7 +88,7 @@ function request_poll_info()
                 env: env
             },
             type: "GET",
-            dataType: "json",
+            //dataType: "json",
             error: error_func
         }),
         $.ajax({
@@ -99,7 +99,7 @@ function request_poll_info()
                 env: env
             },
             type: "GET",
-            dataType: "json",
+            //dataType: "json",
             error: error_func
         })
     ).then(draw_vote_view);
@@ -160,7 +160,7 @@ function draw_vote_view(poll_response, vote_response)
         // Ranked
         else if(poll.type.name == "ranked") {
             $("#main").append("<p>Rank the following items via click and drag.</p>");
-            $("#main").append("<ul id=\"vote_list\"></ul>\n");
+            $("#main").append("<ol id=\"vote_list\"></ol>\n");
 
             for(i = 0; i < poll.options.length; i++) {
                 $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
@@ -204,7 +204,7 @@ function results()
             env: env
         },
         type: "GET",
-        dataType: "json",
+        //dataType: "json",
         success: draw_results,
         error: error_func
     });

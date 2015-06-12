@@ -5,7 +5,7 @@
     background-color: #3333FF;
 }
 #vote_list > .locked {
-    background-color: #999999;
+    background-color: #999999 !important;
 }
 #vote_list > .locked:hover {
     background-color: #999999;
