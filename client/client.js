@@ -233,7 +233,7 @@ function draw_results(response)
             'title':'Poll Results',
             'width' : 500,
             'height': 500,
-            'backgroundColor' : '#EEEEEE'
+            'backgroundColor' : '#808080'
         };
         var chart = new google.visualization.ColumnChart(document.getElementById('results'));
         chart.draw(data, options);
