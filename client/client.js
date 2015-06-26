@@ -134,9 +134,18 @@ function draw_vote_view(poll_response, vote_response)
         $("#main").append("<div id=\"client-poll-countdown\"></div>");
 
          // Setup countdown
-         var countdownDate = new Date(poll.end_date);
-         $('#client-poll-countdown').countdown({until: countdownDate});
+         var countdownDate = new Date();
+         var regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+         var match = regex.exec(poll.end_date);
+         countdownDate.setFullYear(match[1]);
+         countdownDate.setMonth(match[2]);
+         countdownDate.setMonth(countdownDate.getMonth() - 1);
+         countdownDate.setDate(match[3]);
+         countdownDate.setHours(match[4]);
+         countdownDate.setMinutes(match[5]);
+         countdownDate.setSeconds(match[6]);
 
+         $('#client-poll-countdown').countdown({until: countdownDate});
 
         // Multivote 
         if(poll.type.name == "multivote") {
