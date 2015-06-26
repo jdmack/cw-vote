@@ -131,12 +131,21 @@ function draw_vote_view(poll_response, vote_response)
         $("#main").append("<h2>" + poll.description + "</h2>\n");
         $("#main").append("<h3>Start: " + poll.start_date + "</h3>\n");
         $("#main").append("<h3>End: " + poll.end_date + "</h3>\n");
-        $("#main").append("<span id=\"client-poll-countdown\" class=\"countdown\"></span><br><br>");
+        $("#main").append("<div id=\"client-poll-countdown\"></div>");
 
          // Setup countdown
-         var countdownDate = new Date(poll.end_date);
-         $('#client-poll-countdown').countdown({until: countdownDate});
+         var countdownDate = new Date();
+         var regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+         var match = regex.exec(poll.end_date);
+         countdownDate.setFullYear(match[1]);
+         countdownDate.setMonth(match[2]);
+         countdownDate.setMonth(countdownDate.getMonth() - 1);
+         countdownDate.setDate(match[3]);
+         countdownDate.setHours(match[4]);
+         countdownDate.setMinutes(match[5]);
+         countdownDate.setSeconds(match[6]);
 
+         $('#client-poll-countdown').countdown({until: countdownDate});
 
         // Multivote 
         if(poll.type.name == "multivote") {
@@ -152,7 +161,7 @@ function draw_vote_view(poll_response, vote_response)
             // "select" the options already voted for
             if(votes != null) {
                 for(i = 0; i < votes.length; ++i) {
-                    $("#option-" + votes[i].option.id).addClass("selected");
+                    $("li#option-" + votes[i].option.id).addClass("selected");
                 }
             }
             set_click_trigger();
@@ -160,7 +169,7 @@ function draw_vote_view(poll_response, vote_response)
         // Ranked
         else if(poll.type.name == "ranked") {
             $("#main").append("<p>Rank the following items via click and drag.</p>");
-            $("#main").append("<ul id=\"vote_list\"></ul>\n");
+            $("#main").append("<ol id=\"vote_list\"></ol>\n");
 
             for(i = 0; i < poll.options.length; i++) {
                 $("#vote_list").append("<li id=\"option-" + poll.options[i].id + "\">" + poll.options[i].name + "</li>\n");
@@ -233,7 +242,7 @@ function draw_results(response)
             'title':'Poll Results',
             'width' : 500,
             'height': 500,
-            'backgroundColor' : '#EEEEEE'
+            'backgroundColor' : '#808080'
         };
         var chart = new google.visualization.ColumnChart(document.getElementById('results'));
         chart.draw(data, options);
@@ -259,7 +268,7 @@ function lock_vote()
     //$("#debug").html("lock");
     $("#vote_button").prop("disabled", true);
     if(current_poll.type.name == "multivote") {
-        $("li.selected").toggleClass("locked");
+        $("#vote_list > li.selected").toggleClass("locked");
     }
     else if(current_poll.type.name == "ranked") {
         $("#vote_list").sortable("disable");
@@ -277,7 +286,7 @@ function unlock_vote()
     $("#vote_button").prop("disabled", false);
 
     if(current_poll.type.name == "multivote") {
-        $("li.selected").toggleClass("locked");
+        $("#vote_list > li.selected").toggleClass("locked");
     }
     else if(current_poll.type.name == "ranked") {
         $("#vote_list").sortable("enable");
@@ -298,7 +307,7 @@ function cast_votes()
 
     if(current_poll.type.name == "multivote") {
 
-        $("li.selected").each(function() {
+        $("#vote_list > li.selected").each(function() {
             options.push($(this).html());  
         });
 
@@ -377,7 +386,7 @@ function set_click_trigger()
             if($(this).hasClass("selected")) {
                 $(this).toggleClass("selected");
             }
-            else if($("li.selected").size() < max_votes) {
+            else if($("#vote_list > li.selected").size() < max_votes) {
                 $(this).toggleClass("selected");
             }
         }

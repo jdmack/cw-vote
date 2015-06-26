@@ -370,7 +370,7 @@ function admin_draw_current_poll(poll_response)
 
         $("#admin-main").append("<h2>" + poll.name + "</h2>\n");
         $("#admin-main").append("<h3>" + poll.description + "</h3>\n");
-        $("#admin-main").append("<span id=\"admin-poll-countdown\" class=\"countdown\"></span>");
+        $("#admin-main").append("<div id=\"admin-poll-countdown\"></div>");
         $("#admin-main").append("<h3>Start: " + poll.start_date + "</h3>\n");
         $("#admin-main").append("<h3>End: " + poll.end_date + "</h3>\n");
         $("#admin-main").append("<h3>Poll Type: " + poll.type.name + "</h3>\n");
